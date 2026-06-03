@@ -1427,6 +1427,7 @@ textarea {
   }
 
   .nav-links--open {
+    background-color: #212121;
     display: grid;
   }
 
