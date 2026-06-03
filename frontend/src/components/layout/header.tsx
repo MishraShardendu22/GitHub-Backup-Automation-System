@@ -17,7 +17,6 @@ export default function Header() {
           Backup Observatory
         </Link>
         <HeaderNav items={navItems} />
-        <div className="header-meta">SSR</div>
       </div>
     </header>
   );

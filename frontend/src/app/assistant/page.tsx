@@ -2,15 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { getDashboardStats, getLatestReport, postChat, sendReport } from "@/lib/api";
-import { formatBytes, formatDate, formatDuration } from "@/lib/utils";
+import { formatDate, formatDuration } from "@/lib/utils";
 import type { ChatMessage, ChatSource, DashboardStats, ReportBundle } from "@/lib/types";
-import styles from "./page.module.css";
 
 const starterQuestions = [
   "Summarize the latest run in plain English.",
   "What are the most important findings from the latest snapshot?",
   "Are there any archive growth risks I should know about?",
-  "What should I email right now?",
   "Use web search for extra context on this run.",
 ];
 
@@ -51,12 +49,12 @@ function renderChatSources(sources?: ChatSource[]) {
   }
 
   return (
-    <div className={styles.messageSources}>
-      <span className={styles.messageSourcesLabel}>Sources</span>
-      <ul className={styles.messageSourcesList}>
+    <div className="messageSources">
+      <span className="messageSourcesLabel">Sources</span>
+      <ul className="messageSourcesList">
         {sources.map((source, index) => (
-          <li key={`${source.url}-${index}`} className={styles.messageSourceItem}>
-            <a className={styles.messageSourceLink} href={source.url} target="_blank" rel="noreferrer">
+          <li key={`${source.url}-${index}`} className="messageSourceItem">
+            <a className="messageSourceLink" href={source.url} target="_blank" rel="noreferrer">
               {source.label}
             </a>
           </li>
@@ -239,7 +237,7 @@ export default function AssistantPage() {
     if (!parsed) {
       return (
         <div
-          className={styles.fallbackMarkdown}
+          className="fallbackMarkdown"
           dangerouslySetInnerHTML={{ __html: convertMarkdownToHtml(text) }}
         />
       );
@@ -250,89 +248,89 @@ export default function AssistantPage() {
     const restSummary = rawSummary.split(/\r?\n/).slice(1).join("\n").trim();
 
     return (
-      <div className={styles.reportFrame}>
-        <div className={styles.reportTop}>
-          <p className={styles.reportPromptTitle}>
+      <div className="reportFrame">
+        <div className="reportTop">
+          <p className="reportPromptTitle">
             Which repositories show unusual growth this week?
           </p>
-          <h3 className={styles.reportTitle}>{firstLine || "Assessment"}</h3>
-          {restSummary ? <p className={styles.reportSummary}>{restSummary}</p> : null}
+          <h3 className="reportTitle">{firstLine || "Assessment"}</h3>
+          {restSummary ? <p className="reportSummary">{restSummary}</p> : null}
         </div>
 
-        <div className={styles.reportGrid}>
-          <div className={styles.reportCol}>
-            <div className={styles.reportColTitle}>Findings</div>
+        <div className="reportGrid">
+          <div className="reportCol">
+            <div className="reportColTitle">Findings</div>
             {parsed.findings && parsed.findings.length > 0 ? (
-              <ul className={styles.reportList}>
+              <ul className="reportList">
                 {parsed.findings.map((f, i) => (
-                  <li key={i} className={styles.reportListItem}>
+                  <li key={i} className="reportListItem">
                     {f}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className={styles.reportMuted}>No findings</p>
+              <p className="reportMuted">No findings</p>
             )}
           </div>
 
-          <div className={styles.reportCol}>
-            <div className={styles.reportColTitle}>Next Steps</div>
+          <div className="reportCol">
+            <div className="reportColTitle">Next Steps</div>
             {parsed.next_steps && parsed.next_steps.length > 0 ? (
-              <ul className={styles.reportList}>
+              <ul className="reportList">
                 {parsed.next_steps.map((f, i) => (
-                  <li key={i} className={styles.reportListItem}>
+                  <li key={i} className="reportListItem">
                     {f}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className={styles.reportMuted}>No suggestions</p>
+              <p className="reportMuted">No suggestions</p>
             )}
           </div>
 
-          <div className={styles.reportCol}>
-            <div className={styles.reportColTitle}>Risks</div>
+          <div className="reportCol">
+            <div className="reportColTitle">Risks</div>
             {parsed.risks && parsed.risks.length > 0 ? (
-              <ul className={styles.reportList}>
+              <ul className="reportList">
                 {parsed.risks.map((f, i) => (
-                  <li key={i} className={styles.reportListItem}>
+                  <li key={i} className="reportListItem">
                     {f}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className={styles.reportMuted}>No risks</p>
+              <p className="reportMuted">No risks</p>
             )}
           </div>
 
-          <div className={styles.reportCol}>
-            <div className={styles.reportColTitle}>Questions</div>
+          <div className="reportCol">
+            <div className="reportColTitle">Questions</div>
             {parsed.questions && parsed.questions.length > 0 ? (
-              <ul className={styles.reportList}>
+              <ul className="reportList">
                 {parsed.questions.map((f, i) => (
-                  <li key={i} className={styles.reportListItem}>
+                  <li key={i} className="reportListItem">
                     {f}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className={styles.reportMuted}>No questions</p>
+              <p className="reportMuted">No questions</p>
             )}
           </div>
         </div>
 
         {parsed.sources && parsed.sources.length > 0 ? (
-          <div className={styles.sourcesWrap}>
-            <span className={styles.sourcesLabel}>Sources</span>
-            <ul className={styles.sourcesList}>
+          <div className="sourcesWrap">
+            <span className="sourcesLabel">Sources</span>
+            <ul className="sourcesList">
               {parsed.sources.map((source, index) => {
                 const parsedSource = parseSourceItem(source);
 
                 return (
-                  <li key={index} className={styles.sourceItem}>
+                  <li key={index} className="sourceItem">
                     {parsedSource.url ? (
                       <a
-                        className={styles.sourceLink}
+                        className="sourceLink"
                         href={parsedSource.url}
                         target="_blank"
                         rel="noreferrer"
@@ -340,7 +338,7 @@ export default function AssistantPage() {
                         {parsedSource.label}
                       </a>
                     ) : (
-                      <span className={styles.sourcesValue}>{parsedSource.label}</span>
+                      <span className="sourcesValue">{parsedSource.label}</span>
                     )}
                   </li>
                 );
@@ -457,20 +455,20 @@ export default function AssistantPage() {
     "Generate the PDF to see the current run summary here.";
 
   return (
-    <div className={styles.pageWrap}>
-      <section className={styles.assessmentShell}>
-        <div className={styles.heroRow}>
+    <div className="pageWrap">
+      <section className="assessmentShell">
+        <div className="heroRow">
           <div>
-            <p className={styles.kicker}>Assessment Studio</p>
-            <h1 className={styles.pageTitle}>Backup Risk Assessment</h1>
-            <p className={styles.pageSubtitle}>
+            <p className="kicker">Assessment Studio</p>
+            <h1 className="pageTitle">Backup Risk Assessment</h1>
+            <p className="pageSubtitle">
               Ask direct questions about your latest run and get an executive-style
               assessment with findings, next steps, and risks.
             </p>
           </div>
 
-          <div className={styles.headerMeta}>
-            <span className={styles.statusPill}>
+          <div className="headerMeta">
+            <span className="statusPill">
               {stats?.last_run_status ?? "No run yet"}
             </span>
             <button
@@ -484,10 +482,10 @@ export default function AssistantPage() {
           </div>
         </div>
 
-        <div className={styles.composerWrap}>
+        <div className="composerWrap">
           <textarea
             ref={composerRef}
-            className={styles.composer}
+            className="composer"
             placeholder="Ask a question (e.g. 'Which repositories show unusual growth this week?')"
             value={input}
             onChange={(event) => setInput(event.target.value)}
@@ -500,8 +498,8 @@ export default function AssistantPage() {
             disabled={loading}
           />
 
-          <div className={styles.composerActions}>
-            <label className={styles.webSearchLabel}>
+          <div className="composerActions">
+            <label className="webSearchLabel">
               <input
                 type="checkbox"
                 checked={webSearch}
@@ -512,7 +510,7 @@ export default function AssistantPage() {
 
             <button
               type="button"
-              className={styles.sendBtn}
+              className="sendBtn"
               onClick={() => void sendMessage()}
               disabled={loading || !input.trim()}
             >
@@ -521,17 +519,17 @@ export default function AssistantPage() {
           </div>
         </div>
 
-        <p className={styles.promptHint}>
+        <p className="promptHint">
           Premade questions are shown first so you can jump straight into the
           most common backup-review flows.
         </p>
 
-        <div className={styles.premadeGrid}>
+        <div className="premadeGrid">
           {starterQuestions.map((question) => (
             <button
               key={question}
               type="button"
-              className={styles.premadeBtn}
+              className="premadeBtn"
               onClick={() => draftPrompt(question)}
             >
               {question}
@@ -539,37 +537,37 @@ export default function AssistantPage() {
           ))}
         </div>
 
-        {reportStatus ? <p className={styles.reportStatus}>{reportStatus}</p> : null}
+        {reportStatus ? <p className="reportStatus">{reportStatus}</p> : null}
 
         {messages.length > 0 ? (
-          <div className={styles.chatFeed}>
+          <div className="chatFeed">
             {messages.map((message) => {
               const isUser = message.role === "user";
 
               return (
                 <article
                   key={message.id}
-                  className={isUser ? styles.userBubbleWrap : styles.assistantWrap}
+                  className={isUser ?"userBubbleWrap" : "assistantWrap"}
                 >
-                  <div className={styles.msgHeader}>
+                  <div className="msgHeader">
                     {isUser ? "You" : "Assistant"}
                     {message.role === "assistant" && message.web_search
                       ? " · web search"
                       : ""}
                   </div>
 
-                  <div className={isUser ? styles.userBubble : styles.assistantBubble}>
+                  <div className={isUser ?"userBubble" : "assistantBubble"}>
                     {message.role === "assistant" ? (
                       <>
                         <ReportCard text={message.content} />
                         {renderChatSources((message as ChatMessage & { sources?: ChatSource[] }).sources)}
                       </>
                     ) : (
-                      <p className={styles.userText}>{message.content}</p>
+                      <p className="userText">{message.content}</p>
                     )}
                   </div>
 
-                  <div className={styles.msgMeta}>
+                  <div className="msgMeta">
                     {formatDate(message.created_at)}
                     {message.role === "assistant" && message.tokens_used > 0
                       ? ` · ${message.tokens_used} tokens`
@@ -581,13 +579,13 @@ export default function AssistantPage() {
             <div ref={messagesEndRef} />
           </div>
         ) : (
-          <section className={styles.previewCard}>
-            <p className={styles.previewKicker}>Latest Report Preview</p>
-            <h2 className={styles.previewHeadline}>{reportHeadline}</h2>
-            <p className={styles.previewSummary}>{reportSummary}</p>
+          <section className="previewCard">
+            <p className="previewKicker">Latest Report Preview</p>
+            <h2 className="previewHeadline">{reportHeadline}</h2>
+            <p className="previewSummary">{reportSummary}</p>
 
-            <div className={styles.previewStats}>
-              <div className={styles.previewStatItem}>
+            <div className="previewStats">
+              <div className="previewStatItem">
                 <span>Avg Duration</span>
                 <strong>{formatDuration(stats?.avg_duration_ms ?? 0)}</strong>
               </div>
@@ -596,12 +594,12 @@ export default function AssistantPage() {
         )}
 
         {loading ? (
-          <p className={styles.loadingState}>Thinking through the latest data...</p>
+          <p className="loadingState">Thinking through the latest data...</p>
         ) : null}
 
         <button
           type="button"
-          className={styles.focusJump}
+          className="focusJump"
           onClick={focusComposer}
           aria-label="Focus question input"
         >
