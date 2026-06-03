@@ -588,14 +588,6 @@ export default function AssistantPage() {
 
             <div className={styles.previewStats}>
               <div className={styles.previewStatItem}>
-                <span>Total Repositories</span>
-                <strong>{stats?.total_repos ?? 0}</strong>
-              </div>
-              <div className={styles.previewStatItem}>
-                <span>Total Size</span>
-                <strong>{formatBytes(stats?.total_size_bytes ?? 0)}</strong>
-              </div>
-              <div className={styles.previewStatItem}>
                 <span>Avg Duration</span>
                 <strong>{formatDuration(stats?.avg_duration_ms ?? 0)}</strong>
               </div>
