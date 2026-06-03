@@ -51,45 +51,48 @@ export default function LivePage() {
   };
 
   return (
-    <div style={{ width: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "end", gap: 24, marginBottom: 24 }}>
+    <div className="page">
+      <div className="page-head">
         <div>
-          <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: 8 }}>
-            REAL-TIME
-          </div>
-          <h1 style={{ fontSize: 42, fontFamily: "var(--font-serif)", marginBottom: 8 }}>
-            Live logs
-          </h1>
-          <p style={{ fontSize: 14, color: "var(--text-secondary)", maxWidth: 720 }}>
+          <div className="page-kicker">Real-time</div>
+          <h1 className="page-title">Live logs</h1>
+          <p className="page-subtitle">
             A clean stream of worker events from PostgreSQL-backed execution logs.
           </p>
         </div>
-        <div className="pill" style={{ gap: 8, fontSize: 13, padding: "8px 14px" }}>
-          <span style={{ width: 8, height: 8, borderRadius: "50%", background: connected ? "var(--success)" : "var(--danger)" }} />
+        <div className="pill status-pill">
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: connected ? "var(--success)" : "var(--danger)",
+            }}
+          />
           {connected ? "Connected" : "Disconnected"}
         </div>
       </div>
 
-      <div className="card" style={{ padding: 0, minHeight: 640 }}>
-        <div style={{ padding: "14px 24px", borderBottom: "1px solid var(--border-light)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div className="card log-card">
+        <div className="log-header">
           <span style={{ fontWeight: 600, fontSize: 14 }}>Log stream</span>
-          <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{logs.length} entries</span>
+          <span className="text-xs text-muted">{logs.length} entries</span>
         </div>
-        <div style={{ height: 580, overflow: "auto", padding: "16px 24px", fontFamily: "'SF Mono', 'Fira Code', monospace", fontSize: 12, lineHeight: 1.8 }}>
+        <div className="log-body">
           {logs.length === 0 ? (
-            <div style={{ color: "var(--text-muted)", textAlign: "center", paddingTop: 120, fontSize: 13 }}>
+            <div className="text-sm text-muted" style={{ textAlign: "center", paddingTop: 120 }}>
               {connected ? "Waiting for log messages..." : "Connecting to WebSocket..."}
             </div>
           ) : (
             logs.map((log, i) => (
-              <div key={`${log.id}-${i}`} style={{ display: "grid", gridTemplateColumns: "88px 42px minmax(140px, 240px) 1fr", gap: 12, alignItems: "start", padding: "6px 0" }}>
-                <span style={{ color: "var(--text-muted)", fontSize: 11 }}>
+              <div key={`${log.id}-${i}`} className="log-row">
+                <span className="text-xs text-muted">
                   {log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : ""}
                 </span>
                 <span style={{ color: levelColor(log.level), fontWeight: 700, fontSize: 11 }}>
                   {log.level?.toUpperCase()}
                 </span>
-                <span style={{ color: "#6b4c9a", fontSize: 11, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <span className="text-xs truncate" style={{ color: "#6b4c9a" }}>
                   {log.repository ? `[${log.repository}]` : "[system]"}
                 </span>
                 <span style={{ fontSize: 12, color: "var(--text)" }}>{log.message}</span>

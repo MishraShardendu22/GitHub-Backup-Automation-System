@@ -75,69 +75,18 @@ export default async function DashboardPage() {
   const latestRepo = topRepos[0];
 
   return (
-    <div style={{ width: "100%" }}>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1.35fr) minmax(320px, 0.65fr)",
-          gap: 28,
-          marginBottom: 28,
-          alignItems: "stretch",
-        }}
-      >
-        <div
-          className="card"
-          style={{
-            padding: 28,
-            position: "relative",
-            overflow: "hidden",
-            minHeight: 220,
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background:
-                "linear-gradient(135deg, rgba(26,26,26,0.03), rgba(192,57,43,0.03))",
-              pointerEvents: "none",
-            }}
-          />
-          <div style={{ position: "relative" }}>
-            <div
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.12em",
-                color: "var(--text-muted)",
-                marginBottom: 12,
-              }}
-            >
-              BACKUP OPERATIONS
-            </div>
-            <h1 style={{ fontSize: 54, lineHeight: 1, marginBottom: 14 }}>
-              Backup Observatory
-            </h1>
-            <p
-              style={{
-                fontSize: 15,
-                color: "var(--text-secondary)",
-                lineHeight: 1.7,
-                maxWidth: 720,
-              }}
-            >
+    <div className="page">
+      <section className="hero-grid">
+        <div className="card hero-card">
+          <div className="hero-glow" />
+          <div className="hero-content">
+            <div className="page-kicker">Backup operations</div>
+            <h1 className="hero-title">Backup Observatory</h1>
+            <p className="hero-subtitle">
               A PostgreSQL-backed overview of backup activity, repository sizes,
               run outcomes, and live worker health.
             </p>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 8,
-                marginTop: 20,
-              }}
-            >
+            <div className="hero-tags">
               <span className="pill">PostgreSQL</span>
               <span className="pill">Execution logs</span>
               <span className="pill">Repo archive sizes</span>
@@ -146,33 +95,24 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gap: 16 }}>
-          <div className="stat-card" style={{ minHeight: 102 }}>
+        <div className="hero-stack">
+          <div className="stat-card stat-card--compact">
             <div className="stat-label">Latest run</div>
-            <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>
+            <div className="stat-value stat-value--md">
               {latestRun ? latestRun.status : "No run yet"}
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
+            <div className="text-xs text-muted">
               {latestRun
                 ? formatDate(latestRun.started_at)
                 : "Waiting for the first backup"}
             </div>
           </div>
-          <div className="stat-card" style={{ minHeight: 102 }}>
+          <div className="stat-card stat-card--compact">
             <div className="stat-label">Largest repository</div>
-            <div
-              style={{
-                fontSize: 20,
-                fontWeight: 600,
-                marginBottom: 4,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
+            <div className="stat-value stat-value--md truncate">
               {latestRepo?.full_name ?? stats?.largest_repository ?? "—"}
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
+            <div className="text-xs text-muted">
               {formatBytes(
                 stats?.largest_archive_bytes ??
                   latestRepo?.archive_size_bytes ??
@@ -180,37 +120,21 @@ export default async function DashboardPage() {
               )}
             </div>
           </div>
-          <div className="stat-card" style={{ minHeight: 102 }}>
+          <div className="stat-card stat-card--compact">
             <div className="stat-label">Largest blob</div>
-            <div
-              style={{
-                fontSize: 20,
-                fontWeight: 600,
-                marginBottom: 4,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
+            <div className="stat-value stat-value--md truncate">
               {latestAnalytics?.largest_blob_path ?? "—"}
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
+            <div className="text-xs text-muted">
               {latestAnalytics
                 ? formatBytes(latestAnalytics.largest_blob_size_bytes)
                 : "Waiting for analytics snapshot"}
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
-          gap: 16,
-          marginBottom: 28,
-        }}
-      >
+      <div className="grid grid-cols-6">
         <div className="stat-card">
           <div className="stat-label">Total runs</div>
           <div className="stat-value">{stats?.total_runs ?? 0}</div>
@@ -244,84 +168,70 @@ export default async function DashboardPage() {
       </div>
 
 
-      <div className="card" style={{ padding: 24, marginBottom: 28 }}>
+      <div className="card section-card">
         <div className="section-title">Git snapshot</div>
         <div className="section-desc">
           Backend-collected repository analytics refreshed from the live _Repos
           checkout.
         </div>
         {latestAnalytics ? (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
-              gap: 14,
-            }}
-          >
+          <div className="grid grid-cols-6">
             <div className="card-flat">
               <div className="stat-label">Commits</div>
-              <div className="stat-value" style={{ fontSize: 22 }}>
+              <div className="stat-value stat-value--md">
                 {latestAnalytics.total_commits}
               </div>
             </div>
             <div className="card-flat">
               <div className="stat-label">Branches</div>
-              <div className="stat-value" style={{ fontSize: 22 }}>
+              <div className="stat-value stat-value--md">
                 {latestAnalytics.branch_count}
               </div>
             </div>
             <div className="card-flat">
               <div className="stat-label">Tags</div>
-              <div className="stat-value" style={{ fontSize: 22 }}>
+              <div className="stat-value stat-value--md">
                 {latestAnalytics.tag_count}
               </div>
             </div>
             <div className="card-flat">
               <div className="stat-label">Tracked files</div>
-              <div className="stat-value" style={{ fontSize: 22 }}>
+              <div className="stat-value stat-value--md">
                 {latestAnalytics.tracked_files}
               </div>
             </div>
             <div className="card-flat">
               <div className="stat-label">Avg blob size</div>
-              <div className="stat-value" style={{ fontSize: 22 }}>
+              <div className="stat-value stat-value--md">
                 {formatBytes(latestAnalytics.avg_blob_size_bytes)}
               </div>
             </div>
             <div className="card-flat">
               <div className="stat-label">Archive count</div>
-              <div className="stat-value" style={{ fontSize: 22 }}>
+              <div className="stat-value stat-value--md">
                 {latestAnalytics.archive_count}
               </div>
             </div>
           </div>
         ) : (
-          <div
-            style={{ color: "var(--text-muted)", fontSize: 13, paddingTop: 12 }}
-          >
+          <div className="text-sm text-muted" style={{ paddingTop: 12 }}>
             Analytics snapshot will appear once the backend collector runs.
           </div>
         )}
       </div>
 
-      <div className="card" style={{ padding: 24 }}>
+      <div className="card">
         <div className="section-title">Recent runs</div>
         <div className="section-desc">
           The latest persisted backup_runs entries, with outcomes and durations.
         </div>
         {recentRuns.length === 0 ? (
-          <div
-            style={{
-              color: "var(--text-muted)",
-              fontSize: 13,
-              padding: "16px 0",
-            }}
-          >
+          <div className="text-sm text-muted" style={{ padding: "16px 0" }}>
             No runs yet
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table className="table" style={{ minWidth: 900 }}>
+          <div className="table-wrap">
+            <table className="table table-wide">
               <thead>
                 <tr>
                   <th>Run</th>

@@ -7,15 +7,7 @@ interface ReportPreviewProps {
 export function ReportPreview({ report }: ReportPreviewProps) {
   return (
     <section className="card" style={{ padding: 24, display: "grid", gap: 18 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "start",
-          gap: 16,
-          flexWrap: "wrap",
-        }}
-      >
+      <div className="page-head">
         <div>
           <div className="section-title">Latest report</div>
           <h3 style={{ fontSize: 28, marginBottom: 8 }}>{report.headline}</h3>
@@ -39,17 +31,11 @@ export function ReportPreview({ report }: ReportPreviewProps) {
         </div>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-          gap: 12,
-        }}
-      >
+      <div className="grid grid-cols-4">
         {report.metrics.map((metric) => (
           <div key={metric.label} className="stat-card" style={{ padding: 16 }}>
             <div className="stat-label">{metric.label}</div>
-            <div className="stat-value" style={{ fontSize: 22 }}>
+            <div className="stat-value stat-value--md">
               {metric.value}
             </div>
             {metric.detail ? (
@@ -61,26 +47,14 @@ export function ReportPreview({ report }: ReportPreviewProps) {
         ))}
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-          gap: 12,
-        }}
-      >
+      <div className="grid grid-cols-2">
         <ReportSection title="Findings" items={report.findings} />
         <ReportSection title="Next steps" items={report.next_steps} />
         <ReportSection title="Risks" items={report.risks} />
         <ReportSection title="Questions" items={report.questions} />
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-          gap: 12,
-        }}
-      >
+      <div className="grid grid-cols-2">
         <div className="card-flat" style={{ padding: 18 }}>
           <div className="section-title">Top repositories</div>
           <div className="section-desc" style={{ marginBottom: 12 }}>
