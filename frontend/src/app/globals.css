@@ -961,7 +961,6 @@ textarea {
 
 .segmented-btn--active {
   background: var(--text);
-  color: #fff;
 }
 
 .grid {
