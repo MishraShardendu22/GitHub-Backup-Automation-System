@@ -102,12 +102,6 @@ export default async function MetricsPage({
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-label">Total size</div>
-          <div className="stat-value">
-            {formatBytes(data?.total_size_bytes ?? 0)}
-          </div>
-        </div>
-        <div className="stat-card">
           <div className="stat-label">Logs stored</div>
           <div className="stat-value">{data?.total_logs ?? 0}</div>
         </div>
