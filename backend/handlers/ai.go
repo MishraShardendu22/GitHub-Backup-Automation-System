@@ -34,10 +34,7 @@ func PostChat(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "invalid request"})
 	}
 
-	// Build context from DB
-	if _, err := db.FinalizeStaleRunningRuns(context.Background(), 30*time.Minute); err != nil {
-		// keep going; context is still useful even if the cleanup fails
-	}
+	db.FinalizeStaleRunningRuns(context.Background(), 30*time.Minute); 
 	dbContext := buildDBContext()
 
 	// Call OpenRouter
@@ -230,7 +227,6 @@ func buildDBContext() string {
 		}
 	}
 
-	// Recent repositories and sizes
 	repoRows, _ := db.Pool.Query(ctx, `SELECT repo_full_name, status, commit_hash, archive_size_bytes, created_at FROM backup_results ORDER BY created_at DESC LIMIT 10`)
 	if repoRows != nil {
 		sb.WriteString("\nRecent repository results:\n")
