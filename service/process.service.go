@@ -155,7 +155,19 @@ func ProcessRepos(repoNames []string, config *model.ConfigModel, db *sql.DB) {
 			}
 
 			commitMsg := helper.BuildCommitMessage(res.RepoName)
-			helper.StageAndCommitRepo(tarball, commitMsg)
+			if err := helper.StageAndCommitRepo(tarball, commitMsg); err != nil {
+				util.Logger().Error("Failed to commit repo",
+					zap.String("repository", res.FullName),
+					zap.Error(err),
+				)
+				failedRepos = append(failedRepos, res.FullName)
+				if mon != nil {
+					mon.LogRepoResult(res.FullName, "failed", res.CurrentHash, 0, 0, "commit failed: "+err.Error())
+					mon.Log("error", "Commit failed: "+err.Error(), res.FullName)
+					mon.UpdateProgress(successCount, len(failedRepos), skippedCount)
+				}
+				continue
+			}
 
 			// 8. Push THIS repo immediately
 			if err := helper.PushBackupRepo(res.RepoName); err != nil {
@@ -212,7 +224,7 @@ func ProcessRepos(repoNames []string, config *model.ConfigModel, db *sql.DB) {
 func parallelHashCheck(repoNames []string, db *sql.DB) []model.RepoHashResult {
 	results := make([]model.RepoHashResult, len(repoNames))
 	var wg sync.WaitGroup
-	
+
 	// It is being used as a counting semaphore.
 	// a synchronization primitive used to control access to shared resources in concurrent systems
 	// basically it is a mechanism to control to make sure 2 thread (here go routines) dont interfere with each others work

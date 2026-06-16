@@ -18,9 +18,9 @@ const (
 )
 
 /*
-Ensure the repo exist, it does always, 
+Ensure the repo exist, it does always,
 if it does not it is created via initialisation script this is just for safety
-*/ 
+*/
 func EnsureReposDirExists() error {
 	cmd := exec.Command("mkdir", "-p", "_Repos")
 	if out, err := cmd.CombinedOutput(); err != nil {
@@ -32,8 +32,8 @@ func EnsureReposDirExists() error {
 
 /*
 Ensure that backup directory(_Repos) exist locally
-if it exists and there is no .git (basically empty) then we will set its remote url (alwasy exist on github) 
-*/ 
+if it exists and there is no .git (basically empty) then we will set its remote url (alwasy exist on github)
+*/
 func EnsureBackupRepoInitialized(config *model.ConfigModel) error {
 	if _, err := os.Stat("_Repos/.git"); err == nil {
 		util.Logger().Info("Backup repository already initialized; skipping init")
@@ -66,13 +66,14 @@ func EnsureBackupRepoInitialized(config *model.ConfigModel) error {
 
 /*
 git ls-remote, gets the latest commit hash of the repository
-basically what commit does HEAD currently point to 
+basically what commit does HEAD currently point to
 
 // this usually happens when the repo exist but its empty (exprience lol)
-if len(fields) == 0 {
-	return "", fmt.Errorf("git ls-remote returned no hash")
-}
-*/ 
+
+	if len(fields) == 0 {
+		return "", fmt.Errorf("git ls-remote returned no hash")
+	}
+*/
 func GetRemoteHeadHash(repoURL string) (string, error) {
 	out, err := exec.Command("git", "ls-remote", repoURL, "HEAD").CombinedOutput()
 	if err != nil {
@@ -89,7 +90,7 @@ func GetRemoteHeadHash(repoURL string) (string, error) {
 
 /*
 remove a certain repository
-*/ 
+*/
 func CleanupExistingRepo(repoName string) {
 	cleanupCmd := exec.Command("sh", "-c", fmt.Sprintf("cd _Repos && rm -rf '%s' '%s.tar.gz'", repoName, repoName))
 	if _, err := cleanupCmd.CombinedOutput(); err != nil {
@@ -101,9 +102,9 @@ func CleanupExistingRepo(repoName string) {
 }
 
 /*
-	Shallow clone the working tree (non-bare) 
-	then remove the .git directory so only the latest code remains
-*/ 
+Shallow clone the working tree (non-bare)
+then remove the .git directory so only the latest code remains
+*/
 func CloneRepo(url string, repoName string) error {
 	return retryCommand(func() *exec.Cmd {
 		return exec.Command("sh", "-c", fmt.Sprintf("cd _Repos && git clone --depth=1 '%s' '%s' && rm -rf '%s/.git'", url, repoName, repoName))
@@ -111,13 +112,13 @@ func CloneRepo(url string, repoName string) error {
 }
 
 /*
-    create a shell instace
-	go inside the _Repos, 
-	archive (compressed) the repo (tar -czf)
-		-c: Create a new archive (bundling).
-		-z: Compress the archive using gzip (compression).
-		-f: Specify the filename of the archive.
-*/ 
+	    create a shell instace
+		go inside the _Repos,
+		archive (compressed) the repo (tar -czf)
+			-c: Create a new archive (bundling).
+			-z: Compress the archive using gzip (compression).
+			-f: Specify the filename of the archive.
+*/
 func ArchiveRepo(repoName string) error {
 	repoDir := fmt.Sprintf("%s", repoName)
 	archiveName := fmt.Sprintf("%s.tar.gz", repoName)
@@ -144,32 +145,29 @@ git diff --staged --quiet
 
 --quiet (Don't print output, Just tell me through the exit code whether differences exist.)
 --staged (Only check the staging area)
-*/ 
-func StageAndCommitRepo(repoName string, commitMsg string) {
-	commitCmd := exec.Command("sh", "-c",
-		fmt.Sprintf("cd _Repos && git add '%s' && "+
-			"if git diff --staged --quiet; then "+
-			"  echo 'no changes'; "+
-			"else "+
-			"  git commit -m '%s' -s; "+
-			"fi", repoName, commitMsg))
-
-	if _, err := commitCmd.CombinedOutput(); err != nil {
-		util.Logger().Warn("Commit failed",
-			zap.String("repository", repoName),
-			zap.Error(err),
-		)
-	}
+*/
+func StageAndCommitRepo(repoName string, commitMsg string) error {
+	operation := fmt.Sprintf("Commit %s", repoName)
+	// Use retryCommand to handle transient/local locking issues and give multiple attempts
+	return retryCommand(func() *exec.Cmd {
+		return exec.Command("sh", "-c",
+			fmt.Sprintf("cd _Repos && git add '%s' && "+
+				"if git diff --staged --quiet; then "+
+				"  echo 'no changes'; "+
+				"else "+
+				"  git commit -m '%s' -s; "+
+				"fi", repoName, commitMsg))
+	}, operation, 2*time.Minute)
 }
 
 /*
 this is used to push the commited repo
 core.compression = 0
-    - git push normally compresses objects before sending them.
-	- i am already compressing the files
-	- compressing the commit will be bad as it will waste CPU and gains little. 
-*/ 
-func PushBackupRepo(label string) error { 
+  - git push normally compresses objects before sending them.
+  - i am already compressing the files
+  - compressing the commit will be bad as it will waste CPU and gains little.
+*/
+func PushBackupRepo(label string) error {
 	return retryCommand(func() *exec.Cmd {
 		cmd := exec.Command(
 			"git",
@@ -186,7 +184,7 @@ func PushBackupRepo(label string) error {
 
 /*
 Initialisation script, usually runs only the first time
-*/ 
+*/
 func buildInitScript(backupRepoPath string) string {
 	return fmt.Sprintf(`cd _Repos && \
 		git init && \
