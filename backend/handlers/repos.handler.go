@@ -2,13 +2,17 @@ package handlers
 
 import (
 	"context"
+	"time"
 
 	"github.com/MishraShardendu22/github-backup/backend/db"
 	"github.com/gofiber/fiber/v2"
 )
 
 func GetRepos(c *fiber.Ctx) error {
-	rows, err := db.Pool.Query(context.Background(),
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	rows, err := db.Pool.Query(ctx,
 		`SELECT repo_full_name, status, commit_hash, archive_size_bytes, created_at
 		 FROM (
 		     SELECT DISTINCT ON (repo_full_name)
@@ -48,3 +52,17 @@ func GetRepos(c *fiber.Ctx) error {
 	}
 	return c.JSON(repos)
 }
+
+/*
+Purpose of the query
+
+1. DISTINCT ON (repo_full_name) keeps only one row per repository.
+
+2. For each repository, it chooses the row with:
+	- Largest archive_size_bytes
+	- If sizes are equal, newest created_at
+
+3. The outer query then sorts all selected repositories by:
+	- Largest archive size = Sort by archive_size_bytes descending (largest first)
+	- Newest backup time = If two rows have the same archive_size_bytes, sort by created_at descending (newest first)
+*/

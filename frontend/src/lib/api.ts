@@ -81,10 +81,3 @@ export const sendReport = (reportType: string) =>
 
 export const getReportHistory = () =>
   fetchAPI<Array<{ id: number; report_type: string; recipients: string; subject: string; status: string; sent_at: string }>>("/api/reports/history");
-
-// System
-export const getSystemHealth = () =>
-  fetchAPI<{ status: string; database: boolean; worker_running: boolean; current_run_id: number | null }>("/api/system/health");
-
-export const getLiveStatus = () =>
-  fetchAPI<import("./types").LiveStatus>("/api/system/live");

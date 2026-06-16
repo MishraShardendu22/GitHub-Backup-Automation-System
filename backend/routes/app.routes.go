@@ -11,35 +11,46 @@ import (
 func Setup(app *fiber.App) {
 	api := app.Group("/api")
 	api.Use(middleware.RateLimitDefault())
-
+	
+	// backup handler
 	api.Get("/backups", handlers.GetBackupRuns)
 	api.Get("/backups/latest", handlers.GetLatestBackup)
 	api.Get("/backups/:id", handlers.GetBackupRun)
 
+	// dashboard handler
 	api.Get("/dashboard/stats", handlers.GetDashboardStats)
+
+	// metrics handler
 	api.Get("/metrics", handlers.GetMetrics)
 	api.Get("/logs", handlers.GetLogs)
+
+	// repos handler
 	api.Get("/repos", handlers.GetRepos)
 
-	ai := api.Group("/ai", middleware.RateLimitStrict())
-	ai.Post("/ai/chat", handlers.PostChat)
-	ai.Get("/ai/conversations", handlers.GetConversations)
-	ai.Get("/ai/conversations/:id", handlers.GetConversation)
-	ai.Delete("/ai/conversations/:id", handlers.DeleteConversation)
-
-	api.Get("/reports/latest", handlers.GetLatestReport)
-	api.Post("/reports/latest", handlers.GetLatestReport)
-	api.Post("/reports/send", handlers.SendReport)
-	api.Get("/reports/history", handlers.GetReportHistory)
-
-	api.Get("/system/health", handlers.GetSystemHealth)
-	api.Get("/system/live", handlers.GetLiveStatus)
-
+	// checks the /ws routes whether the incoming request is asking for a WebSocket upgrade.
 	app.Use("/ws", func(c *fiber.Ctx) error {
+		//if yes, it's asking for upgrade then go to the next function
 		if ws.IsWebSocketUpgrade(c) {
 			return c.Next()
 		}
 		return fiber.ErrUpgradeRequired
 	})
+
 	app.Get("/ws/live", ws.New(websocket.HandleWebSocket))
 }
+
+/*
+	app.Use("/ws", ...) matches paths that start with /ws
+
+	Match
+	- /ws
+	- /ws/
+	- /ws/live
+	- /ws/chat
+
+	No Match
+	- /abc/ws/live
+	- /api/ws/live
+	- /foo/bar/ws
+	
+*/

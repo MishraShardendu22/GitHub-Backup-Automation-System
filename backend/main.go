@@ -39,8 +39,9 @@ func main() {
 	})
 
 
-	app.Use(middleware.SetupLogger())
 	app.Use(middleware.SetupCORS())
+	app.Use(middleware.SetupLogger())
+
 	app.Options("/*", func(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusOK)
 	})
@@ -51,7 +52,6 @@ func main() {
 
 	routes.Setup(app)
 
-	go websocket.DefaultHub.Run()
 	websocket.DefaultHub.StartPolling()
 
 	collectorCtx, collectorCancel := context.WithCancel(context.Background())
