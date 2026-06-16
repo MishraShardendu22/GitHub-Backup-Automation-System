@@ -8,11 +8,13 @@ import (
 	"github.com/MishraShardendu22/github-backup/controller"
 	"github.com/MishraShardendu22/github-backup/database"
 	"github.com/MishraShardendu22/github-backup/model"
+	"github.com/MishraShardendu22/github-backup/service/collect"
+	"github.com/MishraShardendu22/github-backup/service/monitor"
 	"github.com/MishraShardendu22/github-backup/util"
 	"go.uber.org/zap"
 )
 
-/* start and run the backup flow */ 
+/* start and run the backup flow */
 func RunBackupFlow(cfg *model.ConfigModel, db *sql.DB) {
 	// Legacy Code
 	// if err := database.MigrateSchema(db); err != nil {
@@ -33,7 +35,7 @@ func RunBackupFlow(cfg *model.ConfigModel, db *sql.DB) {
 
 	// get the urls
 	urls := config.ImportantURL(cfg)
-	
+
 	// get all repos and remove duplicates
 	allRepos := GetAllRepos(cfg, urls)
 	allRepos = deduplicateRepos(allRepos)
@@ -52,14 +54,14 @@ func RunBackupFlow(cfg *model.ConfigModel, db *sql.DB) {
 	ProcessRepos(allRepos, cfg, db)
 }
 
-/* 
+/*
 Get all the repos concurrently (maybe parallely)
 If:
 - machine has multiple CPU cores (almost certainly yes).
 - GOMAXPROCS is greater than 1 (default is number of available CPUs).
 - The Go scheduler chooses to run the goroutines on different OS threads.
 Then the goroutines may execute in parallel.
-*/ 
+*/
 func GetAllRepos(config *model.ConfigModel, urls *model.URL) []string {
 	var wg sync.WaitGroup
 
@@ -108,7 +110,7 @@ func GetAllRepos(config *model.ConfigModel, urls *model.URL) []string {
 	return allRepos
 }
 
-/* remove cuplicate repos */ 
+/* remove cuplicate repos */
 func deduplicateRepos(repos []string) []string {
 	seen := make(map[string]bool, len(repos))
 	unique := make([]string, 0, len(repos))
@@ -131,7 +133,7 @@ func deduplicateRepos(repos []string) []string {
 	return unique
 }
 
-/* print repos list */ 
+/* print repos list */
 func printRepoList(repos []string) {
 	for _, repo := range repos {
 		util.Logger().Info("Repository discovered",
@@ -140,8 +142,17 @@ func printRepoList(repos []string) {
 	}
 }
 
-/* print summary */ 
-func printBackupSummary(repoNames []string, successCount int, skippedCount int, failedRepos []string) {
+/* print summary */
+func printBackupSummaryFillAnalytics(repoNames []string, successCount int, skippedCount int, failedRepos []string, mon *monitor.Monitor) {
+	err := collect.GenerateAnalytics(repoNames,mon)
+	if err != nil {
+		util.Logger().Error(
+			"Analytics generation failed",
+			zap.Int("run_id", mon.RunID()),
+			zap.Error(err),
+		)
+	}
+
 	util.Logger().Info("Backup summary",
 		zap.Int("total", len(repoNames)),
 		zap.Int("successful", successCount),

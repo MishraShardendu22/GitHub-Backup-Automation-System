@@ -79,7 +79,7 @@ func ProcessRepos(repoNames []string, config *model.ConfigModel, db *sql.DB) {
 			mon.CompleteRun(0, 0, skippedCount, durationMs, "")
 			mon.Log("info", fmt.Sprintf("All %d repos up to date, nothing to clone", skippedCount), "")
 		}
-		printBackupSummary(repoNames, 0, skippedCount, nil)
+		printBackupSummaryFillAnalytics(repoNames, 0, skippedCount, nil, mon)
 		return
 	}
 
@@ -217,7 +217,7 @@ func ProcessRepos(repoNames []string, config *model.ConfigModel, db *sql.DB) {
 			successCount, len(failedRepos), skippedCount, durationMs), "")
 	}
 
-	printBackupSummary(repoNames, successCount, skippedCount, failedRepos)
+	printBackupSummaryFillAnalytics(repoNames, successCount, skippedCount, failedRepos,mon)
 }
 
 // parallely check the hashes of the repos

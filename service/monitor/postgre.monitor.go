@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/MishraShardendu22/github-backup/backend/models"
 	"github.com/MishraShardendu22/github-backup/config"
 	"github.com/MishraShardendu22/github-backup/util"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -13,6 +14,7 @@ import (
 )
 
 // already exist so dont need it but adding for safety
+//
 //go:embed schema.sql
 var migrationSQL string
 
@@ -27,30 +29,30 @@ var instance *Monitor
 /*
 Initialize the monitoring system.
 
-1. Read PostgreSQL URL
-	url := config.LoadConfig().PostgreSql
+ 1. Read PostgreSQL URL
+    url := config.LoadConfig().PostgreSql
 
-2. Connect to PostgreSQL
-	pool, err := pgxpool.New(ctx, url)
-	- creates a connection pool
+ 2. Connect to PostgreSQL
+    pool, err := pgxpool.New(ctx, url)
+    - creates a connection pool
 
-3. Verify connection
-	pool.Ping(ctx)
-	- check connection (Verify Database Reachability) 
+ 3. Verify connection
+    pool.Ping(ctx)
+    - check connection (Verify Database Reachability)
 
-4. Run migrations
-	// create migration context and cancel (same as standard as context and cancel)
-	migrateCtx, migrateCancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer migrateCancel()
+ 4. Run migrations
+    // create migration context and cancel (same as standard as context and cancel)
+    migrateCtx, migrateCancel := context.WithTimeout(context.Background(), 30*time.Second)
+    defer migrateCancel()
 
-	// run the sql of that specific function 
-	if _, err := pool.Exec(migrateCtx, migrationSQL); err != nil {
-		util.Logger().Warn("Monitor: migration failed (tables may already exist)", zap.Error(err))
-	}
-	
-5. Create Monitor singleton
-	Making sure the entire application uses the same Monitor object.
-*/ 
+    // run the sql of that specific function
+    if _, err := pool.Exec(migrateCtx, migrationSQL); err != nil {
+    util.Logger().Warn("Monitor: migration failed (tables may already exist)", zap.Error(err))
+    }
+
+ 5. Create Monitor singleton
+    Making sure the entire application uses the same Monitor object.
+*/
 func Init() error {
 	url := config.LoadConfig().PostgreSql
 	if url == "" {
@@ -63,7 +65,6 @@ func Init() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	
 	pool, err := pgxpool.New(ctx, url)
 	if err != nil {
 		instance = &Monitor{enabled: false}
@@ -180,4 +181,65 @@ func (m *Monitor) UpdateProgress(successful, failed, skipped int) {
 	m.pool.Exec(ctx,
 		`UPDATE backup_runs SET successful=$1, failed=$2, skipped=$3 WHERE id=$4`,
 		successful, failed, skipped, m.runID)
+}
+
+// SaveAnalyticsSnapshot persists one analytics snapshot using the monitor pool.
+func (m *Monitor) SaveAnalyticsSnapshot(snapshot *models.RepoAnalyticsSnapshot) error {
+	if !m.enabled {
+		return nil
+	}
+	if snapshot == nil {
+		return fmt.Errorf("analytics snapshot is nil")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	query := `
+		INSERT INTO analytics_snapshots (
+			captured_at, run_id, head_commit, head_commit_message, head_commit_at,
+			total_commits, branch_count, tag_count, tracked_files,
+			total_blob_size_bytes, avg_blob_size_bytes, largest_blob_path, largest_blob_size_bytes,
+			archive_count, total_archive_size_bytes, avg_archive_size_bytes, largest_archive_path, largest_archive_size_bytes
+		) VALUES (
+			$1, $2, $3, $4, $5,
+			$6, $7, $8, $9,
+			$10, $11, $12, $13,
+			$14, $15, $16, $17, $18
+		)
+	`
+
+	var runID any
+	if snapshot.RunID != nil {
+		runID = *snapshot.RunID
+	}
+
+	_, err := m.pool.Exec(
+		ctx,
+		query,
+		snapshot.CapturedAt,
+		runID,
+		snapshot.HeadCommit,
+		snapshot.HeadCommitMessage,
+		snapshot.HeadCommitAt,
+		snapshot.TotalCommits,
+		snapshot.BranchCount,
+		snapshot.TagCount,
+		snapshot.TrackedFiles,
+		snapshot.TotalBlobSizeBytes,
+		snapshot.AvgBlobSizeBytes,
+		snapshot.LargestBlobPath,
+		snapshot.LargestBlobSizeBytes,
+		snapshot.ArchiveCount,
+		snapshot.TotalArchiveSizeBytes,
+		snapshot.AvgArchiveSizeBytes,
+		snapshot.LargestArchivePath,
+		snapshot.LargestArchiveSizeBytes,
+	)
+	return err
+}
+
+// get the id of the current moniotred isntance
+func (m *Monitor) RunID() int {
+	return m.runID
 }

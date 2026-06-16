@@ -7,8 +7,8 @@ import (
 )
 
 /*
-    Quite self explanatory
-*/ 
+Quite self explanatory
+*/
 func ExtractRepoName(fullName string) string {
 	return fullName[strings.Index(fullName, "/")+1:]
 }
