@@ -1,15 +1,12 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
-	"github.com/MishraShardendu22/github-backup/backend/analytics"
 	"github.com/MishraShardendu22/github-backup/backend/db"
 	"github.com/MishraShardendu22/github-backup/backend/middleware"
 	"github.com/MishraShardendu22/github-backup/backend/routes"
@@ -38,7 +35,6 @@ func main() {
 		ServerHeader: "GBM",
 	})
 
-
 	app.Use(middleware.SetupCORS())
 	app.Use(middleware.SetupLogger())
 
@@ -53,10 +49,6 @@ func main() {
 	routes.Setup(app)
 
 	websocket.DefaultHub.StartPolling()
-
-	collectorCtx, collectorCancel := context.WithCancel(context.Background())
-	defer collectorCancel()
-	analytics.Start(collectorCtx, 30*time.Second)
 
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
@@ -76,7 +68,6 @@ func main() {
 	<-quit
 
 	log.Println("Shutting down server...")
-	collectorCancel()
 	app.Shutdown()
 	db.Close()
 	log.Println("Server stopped")
