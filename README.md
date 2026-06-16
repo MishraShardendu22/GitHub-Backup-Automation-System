@@ -4,7 +4,7 @@ A compact Go-based system that clones, archives, and stores GitHub repositories 
 
 This repository contains two main programs:
 - a worker (CLI) that runs backup flows and stores lightweight SQLite metadata (entrypoint: [main.go](main.go#L1))
-- a web backend (dashboard/API) that serves metrics, run history, real-time logs and an AI assistant UI (entrypoint: [backend/main.go](backend/main.go#L1))
+- a web backend (dashboard/API) that serves metrics, run history, real-time logs and analytics (entrypoint: [backend/main.go](backend/main.go#L1))
 
 **Quick summary**
 - Worker: Walks GitHub (org / user / personal private), deduplicates repos, checks remote HEAD hashes, clones changed repos, archives them to tar.gz, commits to a central `_Repos` git repository and pushes to a configured remote.
@@ -12,7 +12,7 @@ This repository contains two main programs:
 
 **Repository layout (high level)**
 - `main.go` – worker entrypoint and configuration loader. See [main.go](main.go#L1).
-- `backend/` – web server, handlers and websocket logic. See [backend/main.go](backend/main.go#L1) and [backend/routes/router.go](backend/routes/router.go#L1).
+- `backend/` – web server, handlers and websocket logic. See [backend/main.go](backend/main.go#L1) and [backend/routes/app.routes.go](backend/routes/app.routes.go#L1).
 - `service/` – core worker logic. See [service/process.service.go](service/process.service.go#L1) and [service/backup.service.go](service/backup.service.go#L1).
 - `service/helper/` – shell helpers for git, cloning, archiving and pushing. See [service/helper/git.go](service/helper/git.go#L1) and [service/helper/repo.go](service/helper/repo.go#L1).
 - `controller/` – GitHub API fetch logic. See [controller/repo.controller.go](controller/repo.controller.go#L1).
@@ -72,7 +72,7 @@ Notes:
 - Git helpers: [service/helper/git.go](service/helper/git.go#L1)
 - Repo list fetch: [controller/repo.controller.go](controller/repo.controller.go#L1)
 - SQLite schema and operations: [database/schema.go](database/schema.go#L1) and [database/repo_hash.go](database/repo_hash.go#L1)
-- Backend server & routes: [backend/main.go](backend/main.go#L1) and [backend/routes/router.go](backend/routes/router.go#L1)
+- Backend server & routes: [backend/main.go](backend/main.go#L1) and [backend/routes/app.routes.go](backend/routes/app.routes.go#L1)
 - Backend handlers and API contract: [backend/handlers/backup.go](backend/handlers/backup.go#L1) and related handler files in the same folder.
 
 **Security & operational considerations**
@@ -91,7 +91,7 @@ UI screenshots are included in the `Images/` folder. Quick references:
 - Backups / history detail: [backup detail page](https://res.cloudinary.com/dkxw15and/image/upload/v1780047783/image-upload-app/jwc21gmydgfsszmkf7gp.webp)
 - Metrics: [metrics page](https://res.cloudinary.com/dkxw15and/image/upload/v1780047783/image-upload-app/cetzwjhsihehjfajnsjd.webp)
 - Live logs (websocket): [live websocket logs feed](https://res.cloudinary.com/dkxw15and/image/upload/v1780047783/image-upload-app/g1kenharzgn55a5f6u32.webp)
-- AI assistant / risk assessment: [ai results page](https://res.cloudinary.com/dkxw15and/image/upload/v1780047784/image-upload-app/ndhctttlg1nen9okbc98.webp)
+
 - Tailscale / tunnel & server console: [tailscale tunneling](https://res.cloudinary.com/dkxw15and/image/upload/v1780047963/image-upload-app/joue7txmzahi5zfooex5.png)
 - Service and Timer details: [Details](https://res.cloudinary.com/dkxw15and/image/upload/v1780047608/image-upload-app/v4gtqqkjsv5cwrlxmtsj.png)
 - SSH Multiplexing and Config Management for multiple github accounts: [SSH Management](https://res.cloudinary.com/dkxw15and/image/upload/v1780048238/image-upload-app/e6uagcp9nue0prxzkpdm.png)

@@ -7,7 +7,7 @@ Components:
   - Responsibilities: discover repositories, decide which changed, clone/archive, commit & push to `_Repos`, update SQLite metadata and log failures.
 
 - Backend (Dashboard/API): `backend/main.go`
-  - Responsibilities: connect to PostgreSQL, apply migrations, provide REST endpoints for runs/metrics/logs, and a WebSocket endpoint for live logs.
+  - Responsibilities: connect to PostgreSQL, apply migrations, provide REST endpoints for runs/metrics/analytics/logs, and a WebSocket endpoint for live logs.
 
 Key packages and responsibilities:
 - `controller/` — GitHub API client wrappers (uses `resty`) to fetch paginated lists of repositories.
@@ -25,7 +25,7 @@ Data flow (simplified):
 3. Worker compares remote HEAD hashes (via `git ls-remote`) with the previously stored hash in SQLite.
 4. For changed repos: shallow clone -> remove `.git` -> tar.gz -> git add/commit/push (in `_Repos`).
 5. Worker updates SQLite with latest commit hash and logs any failure in `failed_logs`.
-6. Backend connects to PostgreSQL (separate DB) and exposes historical runs, metrics and live logs which the UI renders.
+6. Backend connects to PostgreSQL (separate DB) and exposes historical runs, metrics, analytics snapshots, and live logs which the UI renders.
 
 Concurrency model:
 - Hash checking: concurrent up to `hashCheckWorkers`.
