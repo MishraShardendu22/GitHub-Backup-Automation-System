@@ -50,7 +50,7 @@ func main() {
 
 	websocket.DefaultHub.StartPolling()
 
-	port := os.Getenv("SERVER_PORT")
+	port := "8080"
 	if port == "" {
 		port = "8080"
 	}
