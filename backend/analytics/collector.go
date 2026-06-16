@@ -43,6 +43,12 @@ func Start(ctx context.Context, interval time.Duration) {
 }
 
 func Refresh(ctx context.Context) error {
+	host, _ := os.Hostname()
+
+	util.Logger().Info(
+		"ANALYTICS_REFRESH",
+		zap.String("host", host),
+	)
 	if db.Pool == nil {
 		return fmt.Errorf("postgres pool is not ready")
 	}
@@ -73,6 +79,7 @@ func Refresh(ctx context.Context) error {
 }
 
 func resolveRepoDir() (string, error) {
+
 	candidates := []string{
 		os.Getenv("BACKUP_REPO_DIR"),
 		defaultRepoDir,
@@ -84,6 +91,11 @@ func resolveRepoDir() (string, error) {
 			continue
 		}
 		if info, err := os.Stat(filepath.Join(candidate, ".git")); err == nil && info.IsDir() {
+			util.Logger().Info(
+				"ANALYTICS_REPO_FOUND",
+				zap.String("repo", candidate),
+			)
+
 			return candidate, nil
 		}
 	}
@@ -226,6 +238,13 @@ func getCurrentRunID(ctx context.Context) (*int, error) {
 }
 
 func persistSnapshot(ctx context.Context, snapshot *models.RepoAnalyticsSnapshot) error {
+	host, _ := os.Hostname()
+
+	util.Logger().Info(
+		"ANALYTICS_INSERT",
+		zap.String("host", host),
+		zap.String("commit", snapshot.HeadCommit),
+	)
 	if snapshot == nil {
 		return fmt.Errorf("analytics snapshot is nil")
 	}
