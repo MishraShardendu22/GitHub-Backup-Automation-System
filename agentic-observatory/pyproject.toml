@@ -12,4 +12,5 @@ dependencies = [
     "pydantic",
     "pydantic-settings",
     "python-dotenv",
+    "langchain-openrouter",
 ]
