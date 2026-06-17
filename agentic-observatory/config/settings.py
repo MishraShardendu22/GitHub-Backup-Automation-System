@@ -1,4 +1,4 @@
-# 
+# basically get the env variables from .env file and make them available as settings
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):

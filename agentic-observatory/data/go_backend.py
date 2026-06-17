@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import httpx
 from typing import Any
-from config.settings import settings
+from config import settings
 
 class GoBackendClient:
     def __init__(self):
