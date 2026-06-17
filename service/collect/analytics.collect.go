@@ -133,7 +133,17 @@ func runGitCount(args ...string) (int, error) {
 
 	count, err := strconv.Atoi(out)
 	if err != nil {
-		return 0, fmt.Errorf("parse git count %q: %w", out, err)
+		lines := strings.Split(out, "\n")
+		count := 0
+		for _, line := range lines {
+			if strings.TrimSpace(line) != "" {
+				count++
+			}
+		}
+		if count == 0 {
+			return 0, fmt.Errorf("parse git count %q: %w", out, err)
+		}
+		return count, nil
 	}
 
 	return count, nil
