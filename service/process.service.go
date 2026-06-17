@@ -25,6 +25,15 @@ const (
 )
 
 func ProcessRepos(repoNames []string, config *model.ConfigModel, db *sql.DB) {
+	// storing the duration of each repo backup in ms
+	// if start is zero it means backup did not start so return 0 otherwise return the duration in ms
+	repoDurationMs := func(start time.Time) int64 {
+		if start.IsZero() {
+			return 0
+		}
+		return time.Since(start).Milliseconds()
+	}
+
 	// 1.
 	if err := helper.EnsureReposDirExists(); err != nil {
 		util.ErrorHandler(err)
@@ -114,7 +123,7 @@ func ProcessRepos(repoNames []string, config *model.ConfigModel, db *sql.DB) {
 				recordFailure(db, res.FullName, res.Err)
 				failedRepos = append(failedRepos, res.FullName)
 				if mon != nil {
-					mon.LogRepoResult(res.FullName, "failed", res.CurrentHash, 0, 0, res.Err.Error())
+					mon.LogRepoResult(res.FullName, "failed", res.CurrentHash, 0, repoDurationMs(res.StartedAt), res.Err.Error())
 					mon.Log("error", "Backup failed: "+res.Err.Error(), res.FullName)
 					mon.UpdateProgress(successCount, len(failedRepos), skippedCount)
 				}
@@ -132,12 +141,13 @@ func ProcessRepos(repoNames []string, config *model.ConfigModel, db *sql.DB) {
 				)
 				failedRepos = append(failedRepos, res.FullName)
 				if mon != nil {
-					mon.LogRepoResult(res.FullName, "failed", res.CurrentHash, 0, 0, err.Error())
+					mon.LogRepoResult(res.FullName, "failed", res.CurrentHash, 0, repoDurationMs(res.StartedAt), err.Error())
 					mon.Log("error", "Archive inspection failed: "+err.Error(), res.FullName)
 					mon.UpdateProgress(successCount, len(failedRepos), skippedCount)
 				}
 				continue
 			}
+			res.ArchiveSize = info.Size()
 
 			if info.Size() > maxGitHubBlobSize {
 				util.Logger().Warn(
@@ -162,7 +172,7 @@ func ProcessRepos(repoNames []string, config *model.ConfigModel, db *sql.DB) {
 				)
 				failedRepos = append(failedRepos, res.FullName)
 				if mon != nil {
-					mon.LogRepoResult(res.FullName, "failed", res.CurrentHash, 0, 0, "commit failed: "+err.Error())
+					mon.LogRepoResult(res.FullName, "failed", res.CurrentHash, res.ArchiveSize, repoDurationMs(res.StartedAt), "commit failed: "+err.Error())
 					mon.Log("error", "Commit failed: "+err.Error(), res.FullName)
 					mon.UpdateProgress(successCount, len(failedRepos), skippedCount)
 				}
@@ -177,7 +187,7 @@ func ProcessRepos(repoNames []string, config *model.ConfigModel, db *sql.DB) {
 				)
 				failedRepos = append(failedRepos, res.FullName)
 				if mon != nil {
-					mon.LogRepoResult(res.FullName, "failed", res.CurrentHash, 0, 0, "push failed: "+err.Error())
+					mon.LogRepoResult(res.FullName, "failed", res.CurrentHash, res.ArchiveSize, repoDurationMs(res.StartedAt), "push failed: "+err.Error())
 					mon.Log("error", "Push failed: "+err.Error(), res.FullName)
 					mon.UpdateProgress(successCount, len(failedRepos), skippedCount)
 				}
@@ -199,7 +209,7 @@ func ProcessRepos(repoNames []string, config *model.ConfigModel, db *sql.DB) {
 				zap.String("repository", res.FullName),
 			)
 			if mon != nil {
-				mon.LogRepoResult(res.FullName, "completed", res.CurrentHash, 0, 0, "")
+				mon.LogRepoResult(res.FullName, "completed", res.CurrentHash, res.ArchiveSize, repoDurationMs(res.StartedAt), "")
 				mon.Log("info", "Backup completed and pushed", res.FullName)
 				mon.UpdateProgress(successCount, len(failedRepos), skippedCount)
 			}
@@ -217,7 +227,7 @@ func ProcessRepos(repoNames []string, config *model.ConfigModel, db *sql.DB) {
 			successCount, len(failedRepos), skippedCount, durationMs), "")
 	}
 
-	printBackupSummaryFillAnalytics(repoNames, successCount, skippedCount, failedRepos,mon)
+	printBackupSummaryFillAnalytics(repoNames, successCount, skippedCount, failedRepos, mon)
 }
 
 // parallely check the hashes of the repos
@@ -313,6 +323,7 @@ func parallelCloneAndArchive(repos []model.RepoHashResult) []model.RepoResult {
 				RepoName:    hr.RepoName,
 				URL:         hr.URL,
 				CurrentHash: hr.CurrentHash,
+				StartedAt:   time.Now(),
 			}
 
 			// Clean up any existing clone/archive
