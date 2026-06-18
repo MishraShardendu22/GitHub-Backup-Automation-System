@@ -2,101 +2,859 @@
 
 import {
   BarChart3,
-  GitBranch,
+  ChevronDown,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Edit2,
+  FileCode,
+  Folder,
+  FolderOpen,
   History,
   LayoutDashboard,
+  LogIn,
+  LogOut,
+  type LucideProps,
+  MessageSquare,
+  Plus,
   Radio,
+  Terminal,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useAIContext } from "./AIContext";
 
-const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/backups", label: "Backup History", icon: History },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/live", label: "Live Monitor", icon: Radio },
+interface NavNode {
+  label: string;
+  href?: string;
+  icon: React.ComponentType<LucideProps>;
+  children?: NavNode[];
+  representativeIcon?: React.ComponentType<LucideProps>;
+}
+
+// Tree structure for standard sections
+const treeData: NavNode[] = [
+  {
+    label: "Dashboard",
+    href: "/",
+    icon: LayoutDashboard,
+  },
+  {
+    label: "Backups",
+    icon: Folder,
+    representativeIcon: History,
+    children: [
+      {
+        label: "History",
+        href: "/backups",
+        icon: History,
+      },
+    ],
+  },
+  {
+    label: "Analytics",
+    icon: Folder,
+    representativeIcon: BarChart3,
+    children: [
+      {
+        label: "Overview",
+        href: "/analytics",
+        icon: BarChart3,
+      },
+      {
+        label: "Runs",
+        href: "/analytics/runs",
+        icon: Terminal,
+      },
+      {
+        label: "Snapshots",
+        href: "/analytics/snapshots",
+        icon: FileCode,
+      },
+    ],
+  },
+  {
+    label: "Live Monitor",
+    href: "/live",
+    icon: Radio,
+  },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  isMobileOpen?: boolean;
+  onCloseMobile?: () => void;
+}
+
+export default function Sidebar({
+  isMobileOpen = false,
+  onCloseMobile,
+}: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Shared state from AIContext
+  const {
+    auth,
+    isAuthenticated,
+    sessions,
+    sessionsLoading,
+    activeSessionId,
+    setActiveSessionId,
+    currentView,
+    setCurrentView,
+    createSession,
+    renameSession,
+    deleteSession,
+    logout,
+  } = useAIContext();
+
+  const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({
+    Backups: true,
+    Analytics: true,
+    AIAssistant: true,
+  });
+
+  const [renamingSessionId, setRenamingSessionId] = useState<string | null>(
+    null,
+  );
+  const [renameInput, setRenameInput] = useState("");
+
+  // Hydrate collapsed state from localStorage
+  useEffect(() => {
+    setMounted(true);
+    const saved = localStorage.getItem("sidebar-collapsed");
+    if (saved !== null) {
+      setIsCollapsed(saved === "true");
+    }
+  }, []);
+
+  // Update CSS variable for layout margin-left
+  useEffect(() => {
+    if (mounted) {
+      const width = isCollapsed ? "68px" : "250px";
+      document.documentElement.style.setProperty("--sidebar-width", width);
+    }
+  }, [isCollapsed, mounted]);
+
+  // Auto-expand folder nodes based on pathname
+  useEffect(() => {
+    setExpandedNodes((prev) => {
+      const newExpanded = { ...prev };
+      let changed = false;
+
+      if (pathname.startsWith("/analytics") && !newExpanded.Analytics) {
+        newExpanded.Analytics = true;
+        changed = true;
+      }
+      if (pathname.startsWith("/backups") && !newExpanded.Backups) {
+        newExpanded.Backups = true;
+        changed = true;
+      }
+      if (pathname.startsWith("/ai") && !newExpanded.AIAssistant) {
+        newExpanded.AIAssistant = true;
+        changed = true;
+      }
+
+      return changed ? newExpanded : prev;
+    });
+  }, [pathname]);
+
+  const toggleCollapse = () => {
+    const nextVal = !isCollapsed;
+    setIsCollapsed(nextVal);
+    localStorage.setItem("sidebar-collapsed", String(nextVal));
+  };
+
+  const toggleFolder = (label: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setExpandedNodes((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
+
+  const isActive = (href?: string) => {
+    if (!href) return false;
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
+  const isFolderActive = (node: NavNode) => {
+    if (!node.children) return false;
+    return node.children.some((child) => isActive(child.href));
+  };
+
+  // Create a new session and navigate to AI page
+  const handleNewChat = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      router.push("/ai");
+      onCloseMobile?.();
+      return;
+    }
+    const newSessionId = crypto.randomUUID();
+    try {
+      await createSession(newSessionId, "New Analysis Session");
+      setActiveSessionId(newSessionId);
+      setCurrentView("chat");
+      router.push("/ai");
+      onCloseMobile?.();
+    } catch (err) {
+      console.error("Failed to create session:", err);
+    }
+  };
+
+  // Delete session handler
+  const handleDeleteSession = async (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await deleteSession(id);
+      if (activeSessionId === id) {
+        setActiveSessionId(null);
+        setCurrentView("dashboard");
+      }
+    } catch (err) {
+      console.error("Failed to delete session:", err);
+    }
+  };
+
+  // Rename session handler
+  const handleRenameSession = async (id: string, name: string) => {
+    try {
+      await renameSession(id, name);
+      setRenamingSessionId(null);
+    } catch (err) {
+      console.error("Failed to rename session:", err);
+    }
+  };
+
+  if (!mounted) {
+    return (
+      <aside className="global-sidebar" style={{ width: "250px" }}>
+        <div
+          className="global-sidebar-header"
+          style={{ justifyContent: "flex-end" }}
+        >
+          <button type="button" className="global-sidebar-toggle-btn">
+            <ChevronsLeft size={16} />
+          </button>
+        </div>
+      </aside>
+    );
+  }
 
   return (
-    <aside
-      style={{
-        width: 240,
-        background: "var(--bg-secondary)",
-        borderRight: "1px solid var(--border)",
-        display: "flex",
-        flexDirection: "column",
-        height: "100vh",
-        position: "fixed",
-        left: 0,
-        top: 0,
-      }}
-    >
+    <>
+      {/* Mobile background overlay */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop click */}
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: backdrop click */}
       <div
+        className={`sidebar-overlay ${isMobileOpen ? "mobile-open" : ""}`}
+        onClick={onCloseMobile}
+      />
+
+      <aside
+        className={`global-sidebar ${isMobileOpen ? "mobile-open" : ""}`}
         style={{
-          padding: "20px 16px",
-          borderBottom: "1px solid var(--border)",
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
+          width: isCollapsed ? "68px" : "250px",
         }}
       >
-        <GitBranch size={24} style={{ color: "var(--accent)" }} />
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 15 }}>Backup Monitor</div>
-          <div style={{ fontSize: 11, color: "var(--text-secondary)" }}>
-            GitHub Repository Backup
-          </div>
+        {/* Sidebar Header */}
+        <div
+          className="global-sidebar-header"
+          style={{
+            justifyContent: isCollapsed ? "center" : "space-between",
+            padding: isCollapsed ? "0" : "0 16px",
+            gap: 8,
+          }}
+        >
+          {!isCollapsed && (
+            <div
+              style={{
+                fontWeight: 700,
+                fontSize: "10px",
+                color: "var(--text-secondary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                flex: 1,
+              }}
+              title="GitHub Backup Observatory Agent"
+            >
+              Github Backup Observatory
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={toggleCollapse}
+            className="global-sidebar-toggle-btn"
+            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isCollapsed ? (
+              <ChevronsRight size={16} />
+            ) : (
+              <ChevronsLeft size={16} />
+            )}
+          </button>
         </div>
-      </div>
 
-      <nav style={{ padding: "12px 8px", flex: 1 }}>
-        {navItems.map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/" && pathname.startsWith(item.href));
-          const Icon = item.icon;
+        {/* Navigation tree */}
+        <nav className="tree-nav">
+          {treeData.map((node) => {
+            const hasChildren = node.children && node.children.length > 0;
+            const nodeActive = hasChildren
+              ? isFolderActive(node)
+              : isActive(node.href);
+            const Icon = node.icon;
+            const RepIcon = node.representativeIcon || Icon;
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
+            // Collapsed layout
+            if (isCollapsed) {
+              const mainHref = node.href || node.children?.[0]?.href || "/";
+              return (
+                <div key={node.label} className="sidebar-tooltip-wrapper">
+                  <Link
+                    href={mainHref}
+                    className={`tree-node ${nodeActive ? "active" : ""}`}
+                    style={{ justifyContent: "center", padding: "10px 0" }}
+                    onClick={onCloseMobile}
+                  >
+                    <RepIcon size={18} />
+                  </Link>
+                  <span className="sidebar-tooltip">
+                    {node.label}
+                    {hasChildren &&
+                      node.children &&
+                      ` (${node.children.map((c) => c.label).join(", ")})`}
+                  </span>
+                </div>
+              );
+            }
+
+            // Expanded Folder layout
+            if (hasChildren && node.children) {
+              const isOpen = !!expandedNodes[node.label];
+              const FolderIcon = isOpen ? FolderOpen : Folder;
+
+              return (
+                <div key={node.label} className="tree-node-wrapper">
+                  <button
+                    type="button"
+                    className={`tree-node ${nodeActive ? "active" : ""}`}
+                    onClick={(e) => toggleFolder(node.label, e)}
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      background: "transparent",
+                      border: "none",
+                      padding: "6px 8px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <span className="tree-node-chevron">
+                      {isOpen ? (
+                        <ChevronDown size={14} />
+                      ) : (
+                        <ChevronRight size={14} />
+                      )}
+                    </span>
+                    <span className="tree-node-icon">
+                      <FolderIcon size={16} />
+                    </span>
+                    <span className="tree-node-label">{node.label}</span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="tree-children-container">
+                      {node.children.map((child) => {
+                        const childActive = isActive(child.href);
+                        const ChildIcon = child.icon;
+
+                        return (
+                          <Link
+                            key={child.href}
+                            href={child.href || "/"}
+                            className={`tree-node ${childActive ? "active" : ""}`}
+                            onClick={onCloseMobile}
+                          >
+                            <span
+                              className="tree-node-icon"
+                              style={{ marginLeft: 4 }}
+                            >
+                              <ChildIcon size={14} />
+                            </span>
+                            <span
+                              className="tree-node-label"
+                              style={{ fontSize: "12px" }}
+                            >
+                              {child.label}
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            // Expanded direct leaf layout
+            return (
+              <Link
+                key={node.label}
+                href={node.href || "/"}
+                className={`tree-node ${nodeActive ? "active" : ""}`}
+                style={{ paddingLeft: "26px" }}
+                onClick={onCloseMobile}
+              >
+                <span className="tree-node-icon">
+                  <Icon size={16} />
+                </span>
+                <span className="tree-node-label">{node.label}</span>
+              </Link>
+            );
+          })}
+
+          {/* DYNAMIC AI ASSISTANT NODE (Consolidated Sidebar) */}
+          {isCollapsed ? (
+            <div className="sidebar-tooltip-wrapper">
+              <Link
+                href="/ai"
+                className={`tree-node ${pathname.startsWith("/ai") ? "active" : ""}`}
+                style={{ justifyContent: "center", padding: "10px 0" }}
+                onClick={onCloseMobile}
+              >
+                <MessageSquare size={18} />
+              </Link>
+              <span className="sidebar-tooltip">
+                AI Assistant{" "}
+                {sessions.length > 0 && `(${sessions.length} chats)`}
+              </span>
+            </div>
+          ) : (
+            <div className="tree-node-wrapper">
+              {/* Folder Row header (icon-less as requested) */}
+              <button
+                type="button"
+                className={`tree-node ${pathname.startsWith("/ai") ? "active" : ""}`}
+                onClick={(e) => toggleFolder("AIAssistant", e)}
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  background: "transparent",
+                  border: "none",
+                  padding: "6px 8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                <span className="tree-node-chevron">
+                  {expandedNodes.AIAssistant ? (
+                    <ChevronDown size={14} />
+                  ) : (
+                    <ChevronRight size={14} />
+                  )}
+                </span>
+                <span className="tree-node-label" style={{ fontWeight: 600 }}>
+                  AI Assistant
+                </span>
+              </button>
+
+              {expandedNodes.AIAssistant && (
+                <div className="tree-children-container">
+                  {/* Action 1: New Chat */}
+                  <button
+                    type="button"
+                    className="tree-node"
+                    onClick={handleNewChat}
+                    disabled={!isAuthenticated}
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      background: "transparent",
+                      border: "none",
+                      padding: "5px 8px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      cursor: isAuthenticated ? "pointer" : "not-allowed",
+                      opacity: isAuthenticated ? 1 : 0.5,
+                      color: "var(--accent)",
+                    }}
+                  >
+                    <span className="tree-node-icon" style={{ marginLeft: 4 }}>
+                      <Plus size={14} />
+                    </span>
+                    <span
+                      className="tree-node-label"
+                      style={{ fontSize: "12px", fontWeight: 600 }}
+                    >
+                      New Analysis Chat
+                    </span>
+                  </button>
+
+                  {/* Action 2: Stats Dashboard */}
+                  <button
+                    type="button"
+                    className={`tree-node ${pathname === "/ai" && currentView === "dashboard" ? "active" : ""}`}
+                    onClick={() => {
+                      setActiveSessionId(null);
+                      setCurrentView("dashboard");
+                      router.push("/ai");
+                      onCloseMobile?.();
+                    }}
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      background: "transparent",
+                      border: "none",
+                      padding: "5px 8px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <span className="tree-node-icon" style={{ marginLeft: 4 }}>
+                      <LayoutDashboard size={13} />
+                    </span>
+                    <span
+                      className="tree-node-label"
+                      style={{ fontSize: "12px" }}
+                    >
+                      Stats Dashboard
+                    </span>
+                  </button>
+
+                  {/* Chat History Header */}
+                  <div
+                    style={{
+                      fontSize: "9px",
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                      color: "var(--text-muted)",
+                      padding: "8px 8px 2px 12px",
+                    }}
+                  >
+                    Chat History
+                  </div>
+
+                  {/* List of Chat Sessions */}
+                  {sessionsLoading && sessions.length === 0 ? (
+                    <div
+                      style={{
+                        padding: "6px 12px",
+                        color: "var(--text-muted)",
+                        fontSize: "11px",
+                      }}
+                    >
+                      Syncing...
+                    </div>
+                  ) : sessions.length === 0 ? (
+                    <div
+                      style={{
+                        padding: "6px 12px",
+                        color: "var(--text-muted)",
+                        fontSize: "11px",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      No active chats
+                    </div>
+                  ) : (
+                    sessions.map((s) => {
+                      const isSessionActive =
+                        pathname === "/ai" &&
+                        currentView === "chat" &&
+                        activeSessionId === s.id;
+
+                      return (
+                        <div
+                          key={s.id}
+                          className={`tree-node ${isSessionActive ? "active" : ""}`}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "4px 8px",
+                            position: "relative",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveSessionId(s.id);
+                              setCurrentView("chat");
+                              router.push("/ai");
+                              onCloseMobile?.();
+                            }}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 6,
+                              flex: 1,
+                              minWidth: 0,
+                              cursor: "pointer",
+                              background: "transparent",
+                              border: "none",
+                              padding: 0,
+                              textAlign: "left",
+                              color: "inherit",
+                            }}
+                          >
+                            <span
+                              className="tree-node-icon"
+                              style={{ marginLeft: 4 }}
+                            >
+                              <MessageSquare size={13} />
+                            </span>
+                            {renamingSessionId === s.id ? (
+                              <input
+                                type="text"
+                                className="ai-session-rename-input"
+                                value={renameInput}
+                                onChange={(e) => setRenameInput(e.target.value)}
+                                onBlur={() =>
+                                  handleRenameSession(s.id, renameInput)
+                                }
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter")
+                                    handleRenameSession(s.id, renameInput);
+                                  if (e.key === "Escape")
+                                    setRenamingSessionId(null);
+                                }}
+                                style={{
+                                  background: "rgba(0, 0, 0, 0.4)",
+                                  border: "1px solid var(--accent)",
+                                  color: "var(--text)",
+                                  fontSize: "11px",
+                                  padding: "1px 4px",
+                                  borderRadius: "3px",
+                                  width: "100%",
+                                  outline: "none",
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            ) : (
+                              <span
+                                className="tree-node-label"
+                                style={{
+                                  fontSize: "11.5px",
+                                  textOverflow: "ellipsis",
+                                  overflow: "hidden",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {s.session_name}
+                              </span>
+                            )}
+                          </button>
+
+                          {/* Action Hover Controls */}
+                          {renamingSessionId !== s.id && (
+                            <div
+                              className="sidebar-item-actions"
+                              style={{
+                                display: "flex",
+                                gap: 2,
+                                flexShrink: 0,
+                              }}
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setRenamingSessionId(s.id);
+                                  setRenameInput(s.session_name);
+                                }}
+                                disabled={!isAuthenticated}
+                                style={{
+                                  background: "transparent",
+                                  border: "none",
+                                  color: "var(--text-muted)",
+                                  padding: 2,
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                }}
+                                title="Rename Chat"
+                              >
+                                <Edit2 size={11} />
+                              </button>
+                              {isAuthenticated && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleDeleteSession(s.id, e)}
+                                  style={{
+                                    background: "transparent",
+                                    border: "none",
+                                    color: "var(--text-muted)",
+                                    padding: 2,
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                  }}
+                                  title="Delete Chat"
+                                >
+                                  <Trash2 size={11} />
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </nav>
+
+        {/* User Profile / Auth Actions */}
+        <div
+          style={{
+            padding: isCollapsed ? "12px 8px" : "12px 16px",
+            borderTop: "1px solid var(--border)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
+            overflow: "hidden",
+          }}
+        >
+          {isCollapsed ? (
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              {isAuthenticated ? (
+                <button
+                  type="button"
+                  onClick={logout}
+                  title="Sign Out"
+                  style={{
+                    background: "transparent",
+                    border: "1px solid var(--border)",
+                    color: "var(--text-secondary)",
+                    padding: "6px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <LogOut size={16} />
+                </button>
+              ) : (
+                <Link
+                  href="/ai"
+                  onClick={onCloseMobile}
+                  title="Sign In"
+                  style={{
+                    border: "1px solid var(--border)",
+                    color: "var(--text-secondary)",
+                    padding: "6px",
+                    borderRadius: "4px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <LogIn size={16} />
+                </Link>
+              )}
+            </div>
+          ) : (
+            <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 10,
-                padding: "10px 12px",
-                borderRadius: 8,
-                fontSize: 14,
-                fontWeight: 500,
-                marginBottom: 2,
-                textDecoration: "none",
-                color: isActive ? "var(--accent)" : "var(--text-secondary)",
-                background: isActive
-                  ? "rgba(212, 168, 50, 0.08)"
-                  : "transparent",
-                transition: "all 0.15s",
+                justifyContent: "space-between",
+                gap: 8,
               }}
             >
-              <Icon size={18} />
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div
-        style={{
-          padding: "16px",
-          borderTop: "1px solid var(--border)",
-          fontSize: 11,
-          color: "var(--text-secondary)",
-        }}
-      >
-        v1.0.0 • Built with Go + Next.js
-      </div>
-    </aside>
+              {isAuthenticated ? (
+                <>
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      color: "var(--text)",
+                      textOverflow: "ellipsis",
+                      overflow: "hidden",
+                      whiteSpace: "nowrap",
+                      flex: 1,
+                    }}
+                    title={auth.username || ""}
+                  >
+                    {auth.username}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={logout}
+                    style={{
+                      background: "transparent",
+                      border: "1px solid var(--border)",
+                      color: "var(--text-secondary)",
+                      padding: "4px 8px",
+                      borderRadius: "4px",
+                      fontSize: "11px",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                      whiteSpace: "nowrap",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = "var(--danger)";
+                      e.currentTarget.style.borderColor = "var(--danger-bg)";
+                      e.currentTarget.style.background = "var(--danger-bg)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "var(--text-secondary)";
+                      e.currentTarget.style.borderColor = "var(--border)";
+                      e.currentTarget.style.background = "transparent";
+                    }}
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/ai"
+                  onClick={onCloseMobile}
+                  style={{
+                    border: "1px solid var(--accent)",
+                    color: "var(--accent)",
+                    background: "var(--accent-bg)",
+                    padding: "5px 8px",
+                    borderRadius: "4px",
+                    fontSize: "11px",
+                    textDecoration: "none",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                    textAlign: "center",
+                    width: "100%",
+                  }}
+                >
+                  Sign In
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
+      </aside>
+    </>
   );
 }

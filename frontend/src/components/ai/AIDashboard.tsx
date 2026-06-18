@@ -2,96 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { LoginPanel, MessageBubble, WorkflowDiagram } from "@/components/ai";
+import { useAIContext } from "@/components/layout/AIContext";
 import { LoaderPanel, MetricCard, ToolBadge } from "@/components/ui";
 import { LOADING_MESSAGES, PREMADE_PROMPTS } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/hooks/useChat";
-import { useSessions } from "@/hooks/useSessions";
 import { useStats } from "@/hooks/useStats";
 import { useStreamingAgent } from "@/hooks/useStreamingAgent";
 
-const PlusIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={{ flexShrink: 0 }}
-  >
-    <line x1="12" y1="5" x2="12" y2="19" />
-    <line x1="5" y1="12" x2="19" y2="12" />
-  </svg>
-);
-const DashboardIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={{ flexShrink: 0 }}
-  >
-    <rect x="3" y="3" width="7" height="9" />
-    <rect x="14" y="3" width="7" height="5" />
-    <rect x="14" y="12" width="7" height="9" />
-    <rect x="3" y="16" width="7" height="5" />
-  </svg>
-);
-const ChatIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={{ flexShrink: 0 }}
-  >
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-  </svg>
-);
-const EditIcon = () => (
-  <svg
-    width="12"
-    height="12"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={{ flexShrink: 0 }}
-  >
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-    <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-  </svg>
-);
-const TrashIcon = () => (
-  <svg
-    width="12"
-    height="12"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={{ flexShrink: 0 }}
-  >
-    <polyline points="3 6 5 6 21 6" />
-    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-  </svg>
-);
 const LockIcon = () => (
+  // biome-ignore lint/a11y/noSvgWithoutTitle: decorative lock icon
   <svg
     width="14"
     height="14"
@@ -111,33 +30,26 @@ const LockIcon = () => (
 export function AIDashboard() {
   const {
     auth,
-    login,
-    logout,
-    loading: authLoading,
-    error: authError,
     isAuthenticated,
-  } = useAuth();
+    authLoading,
+    authError,
+    login,
+    sessionsLoading,
+    sessionsError,
+    createSession,
+    activeSessionId,
+    setActiveSessionId,
+    currentView,
+    setCurrentView,
+    logout,
+  } = useAIContext();
+
   const {
     stats,
     loading: statsLoading,
     refresh: refreshStats,
   } = useStats(auth.token);
-  const {
-    sessions,
-    loading: sessionsLoading,
-    error: sessionsError,
-    createSession,
-    renameSession,
-    deleteSession,
-  } = useSessions(auth.token);
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<"dashboard" | "chat">(
-    "dashboard",
-  );
-  const [renamingSessionId, setRenamingSessionId] = useState<string | null>(
-    null,
-  );
-  const [renameInput, setRenameInput] = useState("");
+
   const [input, setInput] = useState("");
   const [loadMsg, setLoadMsg] = useState("");
 
@@ -146,7 +58,6 @@ export function AIDashboard() {
     loading: messagesLoading,
     addMessage,
     updateMessage,
-    clearMessages,
   } = useChat(auth.token, activeSessionId);
   const {
     sending,
@@ -160,6 +71,7 @@ export function AIDashboard() {
   });
 
   const feedRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     document.documentElement.classList.add("ai-page-active");
@@ -195,29 +107,6 @@ export function AIDashboard() {
     }
   }, [sessionsError, logout]);
 
-  const handleCreateSession = async () => {
-    if (!isAuthenticated) return;
-    const newSessionId = crypto.randomUUID();
-    try {
-      await createSession(newSessionId, "Analytics Session");
-      setActiveSessionId(newSessionId);
-      clearMessages();
-      setCurrentView("chat");
-    } catch (err: any) {
-      console.error("Failed to create session:", err);
-      if (
-        err.message &&
-        (err.message.includes("401") ||
-          err.message.includes("Unauthorized") ||
-          err.message.includes("credentials"))
-      ) {
-        logout();
-      } else {
-        alert(err.message || "An error occurred while creating session.");
-      }
-    }
-  };
-
   const handleSendMessage = async (question: string) => {
     if (!auth.token || !question.trim() || sending) return;
 
@@ -245,20 +134,19 @@ export function AIDashboard() {
         addMessage,
       );
       setInput("");
-    } catch (err: any) {
-      console.error("Failed to send message:", err);
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error("Failed to send message:", error);
+      const msg = error.message;
       if (
-        err.message &&
-        (err.message.includes("401") ||
-          err.message.includes("Unauthorized") ||
-          err.message.includes("credentials"))
+        msg &&
+        (msg.includes("401") ||
+          msg.includes("Unauthorized") ||
+          msg.includes("credentials"))
       ) {
         logout();
       } else {
-        alert(
-          err.message ||
-            "An error occurred while communicating with the agent.",
-        );
+        alert(msg || "An error occurred while communicating with the agent.");
       }
     }
   };
@@ -268,193 +156,8 @@ export function AIDashboard() {
     handleSendMessage(input);
   };
 
-  const handleDeleteSession = async (id: string) => {
-    try {
-      await deleteSession(id);
-      if (activeSessionId === id) {
-        setActiveSessionId(null);
-        clearMessages();
-        setCurrentView("dashboard");
-      }
-    } catch (err: any) {
-      console.error("Failed to delete session:", err);
-      if (
-        err.message &&
-        (err.message.includes("401") ||
-          err.message.includes("Unauthorized") ||
-          err.message.includes("credentials"))
-      ) {
-        logout();
-      } else {
-        alert(err.message || "An error occurred while deleting the session.");
-      }
-    }
-  };
-
   return (
     <div className="ai-dashboard-container">
-      {/* Sidebar */}
-      <aside className="ai-sidebar">
-        <div className="ai-sidebar-header">
-          <button
-            className="ai-new-chat-btn"
-            onClick={handleCreateSession}
-            disabled={!isAuthenticated}
-            style={
-              !isAuthenticated ? { opacity: 0.6, cursor: "not-allowed" } : {}
-            }
-          >
-            {isAuthenticated ? <PlusIcon /> : <LockIcon />}
-            New Analysis Chat
-          </button>
-        </div>
-
-        <div className="ai-sidebar-list">
-          <div
-            className={`ai-session-item ${currentView === "dashboard" && !activeSessionId ? "active" : ""}`}
-            onClick={() => {
-              setActiveSessionId(null);
-              clearMessages();
-              setCurrentView("dashboard");
-            }}
-          >
-            <div className="ai-session-title-wrap">
-              <DashboardIcon />
-              <span className="ai-session-title">Stats Dashboard</span>
-            </div>
-          </div>
-
-          <div
-            style={{
-              fontSize: "10px",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              color: "var(--text-secondary)",
-              padding: "12px 12px 4px",
-            }}
-          >
-            Chat History
-          </div>
-
-          {sessionsLoading && sessions.length === 0 ? (
-            <div
-              style={{
-                padding: "12px 16px",
-                color: "var(--text-secondary)",
-                fontSize: "12px",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              <div
-                className="ai-loader-spinner"
-                style={{ width: 12, height: 12, borderWidth: 1.5, margin: 0 }}
-              />
-              <span>Syncing history...</span>
-            </div>
-          ) : sessions.length === 0 ? (
-            <div
-              style={{
-                padding: "12px 16px",
-                color: "var(--text-faint)",
-                fontSize: "12.5px",
-              }}
-            >
-              No active conversations.
-            </div>
-          ) : (
-            sessions.map((s) => (
-              <div
-                key={s.id}
-                className={`ai-session-item ${activeSessionId === s.id ? "active" : ""}`}
-              >
-                <div
-                  className="ai-session-title-wrap"
-                  onClick={() => {
-                    setActiveSessionId(s.id);
-                    setCurrentView("chat");
-                  }}
-                >
-                  <ChatIcon />
-                  {renamingSessionId === s.id ? (
-                    <input
-                      className="ai-session-rename-input"
-                      value={renameInput}
-                      onChange={(e) => setRenameInput(e.target.value)}
-                      onBlur={() => renameSession(s.id, renameInput)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") renameSession(s.id, renameInput);
-                        if (e.key === "Escape") setRenamingSessionId(null);
-                      }}
-                    />
-                  ) : (
-                    <span className="ai-session-title">{s.session_name}</span>
-                  )}
-                </div>
-                {renamingSessionId !== s.id && (
-                  <div className="ai-session-actions">
-                    <button
-                      className="ai-session-action-btn"
-                      onClick={() => {
-                        setRenamingSessionId(s.id);
-                        setRenameInput(s.session_name);
-                      }}
-                      disabled={!isAuthenticated}
-                    >
-                      <EditIcon />
-                    </button>
-                    {isAuthenticated && (
-                      <button
-                        className="ai-session-action-btn delete"
-                        onClick={() => handleDeleteSession(s.id)}
-                      >
-                        <TrashIcon />
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="ai-sidebar-footer">
-          <div className="ai-sidebar-footer-row" style={{ marginTop: 8 }}>
-            {isAuthenticated ? (
-              <>
-                <span style={{ color: "var(--text)" }}>{auth.username}</span>
-                <button
-                  className="btn btn-outline"
-                  style={{ padding: "4px 10px", fontSize: "11px" }}
-                  onClick={logout}
-                >
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              <>
-                <span style={{ color: "var(--text-secondary)" }}>
-                  Guest Mode
-                </span>
-                <button
-                  className="btn btn-outline"
-                  style={{
-                    padding: "4px 10px",
-                    fontSize: "11px",
-                    borderColor: "var(--accent)",
-                    color: "var(--accent)",
-                  }}
-                >
-                  Sign In
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </aside>
-
       {/* Main Area */}
       <main className="ai-main-area">
         <header className="ai-agent-header">
@@ -617,8 +320,8 @@ export function AIDashboard() {
                     </thead>
                     <tbody>
                       {stats?.tool_usage && stats.tool_usage.length > 0 ? (
-                        stats.tool_usage.map((tool, idx) => (
-                          <tr key={idx}>
+                        stats.tool_usage.map((tool) => (
+                          <tr key={tool.name}>
                             <td
                               style={{
                                 fontFamily: "monospace",
@@ -668,7 +371,8 @@ export function AIDashboard() {
                       className="premadeBtn"
                       onClick={() => {
                         if (isAuthenticated) {
-                          handleSendMessage(prompt);
+                          setInput(prompt);
+                          composerRef.current?.focus();
                         }
                       }}
                       disabled={sending || !isAuthenticated}
@@ -743,6 +447,7 @@ export function AIDashboard() {
               }}
             >
               <textarea
+                ref={composerRef}
                 className="composer"
                 style={{
                   flex: 1,
@@ -844,14 +549,14 @@ export function AIDashboard() {
               <button
                 type="button"
                 className="ai-confirm-btn"
-                onClick={() => confirmAction(auth.token!, true)}
+                onClick={() => confirmAction(auth.token || "", true)}
               >
                 Yes, Send Email
               </button>
               <button
                 type="button"
                 className="ai-confirm-btn-abort"
-                onClick={() => confirmAction(auth.token!, false)}
+                onClick={() => confirmAction(auth.token || "", false)}
               >
                 No, Abort
               </button>

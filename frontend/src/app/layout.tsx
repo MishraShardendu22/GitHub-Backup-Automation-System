@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Inter } from "next/font/google";
-import Header from "@/components/layout/header";
+import { AppLayout } from "@/components/layout/AppLayout";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
@@ -33,10 +33,11 @@ export default function RootLayout({
         <a className="skip-link" href="#main-content">
           Skip to content
         </a>
-        <Header />
-        <main id="main-content" className="app-main">
-          {children}
-        </main>
+        <AppLayout>
+          <main id="main-content" className="app-main">
+            {children}
+          </main>
+        </AppLayout>
       </body>
     </html>
   );
