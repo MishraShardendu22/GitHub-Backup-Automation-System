@@ -6,6 +6,7 @@ const navItems = [
   { href: "/backups", label: "Backups" },
   { href: "/analytics", label: "Analytics" },
   { href: "/live", label: "Live" },
+  { href: "/ai", label: "AI" },
 ];
 
 export default function Header() {

@@ -79,3 +79,31 @@ Quick test command:
 ```bash
 .venv/bin/python -c "from utils.logging import logger; logger.info('logger works')"
 ```
+
+By convention:
+
+def public_function():
+    pass
+Public
+Can be imported and called from anywhere
+def _internal_function():
+    pass
+"Protected" by convention
+Single underscore means "internal use, don't touch unless you know what you're doing"
+Still fully accessible
+
+Common conventions:
+
+class Service:
+    def public_method(self):      # Public API
+        pass
+
+    def _helper(self):            # Internal helper
+        pass
+
+    def __secret(self):           # Name mangled
+        pass
+
+Module-level exports can also be controlled with:
+
+__all__ = ["public_function"]

@@ -11,6 +11,13 @@ dependencies = [
     "httpx",
     "pydantic",
     "pydantic-settings",
+    "email-validator",
+    "python-multipart",
     "python-dotenv",
     "langchain-openrouter",
+    "SQLAlchemy>=2.0",
+    "asyncpg",
+    "python-jose[cryptography]",
+    "Jinja2",
+    "WeasyPrint",
 ]

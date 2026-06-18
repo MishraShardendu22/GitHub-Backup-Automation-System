@@ -1881,3 +1881,115 @@ textarea {
 .spinner {
   animation: spin 1s linear infinite;
 }
+
+/* ─── AI Page ──────────────────────────────────────────────────────────────── */
+
+.ai-login-section {
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+
+.ai-login-panel {
+  display: grid;
+  gap: 16px;
+  text-align: center;
+}
+
+.ai-login-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.ai-login-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.ai-login-form {
+  display: grid;
+  gap: 10px;
+}
+
+.ai-login-input {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  padding: 12px 16px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.ai-login-input::placeholder {
+  color: var(--text-muted);
+}
+
+.ai-login-input:focus {
+  border-color: rgba(212, 168, 50, 0.45);
+  box-shadow: 0 0 0 3px rgba(212, 168, 50, 0.12);
+}
+
+.ai-login-error {
+  font-size: 13px;
+  color: var(--danger);
+  background: var(--danger-bg);
+  border: 1px solid rgba(224, 112, 112, 0.22);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  text-align: left;
+}
+
+/* Blinking cursor shown during streaming */
+.ai-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--accent);
+  border-radius: 1px;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: ai-blink 0.9s step-end infinite;
+}
+
+@keyframes ai-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Thinking dots shown before the first token arrives */
+.ai-thinking {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.ai-thinking span {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.4;
+  animation: ai-dot-bounce 1.2s ease-in-out infinite;
+}
+
+.ai-thinking span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.ai-thinking span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes ai-dot-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40%           { transform: translateY(-6px); opacity: 1; }
+}
+
