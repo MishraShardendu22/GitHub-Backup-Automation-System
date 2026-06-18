@@ -4,6 +4,14 @@ import { safeFetch } from "@/lib/api";
 import { formatBytes, formatDate, formatDuration } from "@/lib/utils";
 import type { BackupRun } from "@/types";
 
+export const metadata = {
+  title: "Dashboard Overview",
+  description: "Overview dashboard of GitHub backup runs, repository statistics, archive sizes, and worker execution logs.",
+  alternates: {
+    canonical: "/",
+  },
+};
+
 interface DashboardStats {
   total_runs: number;
   total_repos: number;

@@ -16,9 +16,33 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Backup Observatory",
+  metadataBase: new URL("https://github.mishrashardendu22.is-a.dev"),
+  title: {
+    default: "Backup Observatory | GitHub Backup Monitor",
+    template: "%s | Backup Observatory",
+  },
   description:
-    "Monitor backup metrics and failures from the latest stored data",
+    "Monitor your GitHub repository backup metrics, run execution health, repository archive sizes, and live backup workers in real-time.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Backup Observatory | GitHub Backup Monitor",
+    description: "Monitor your GitHub repository backup metrics, run execution health, repository archive sizes, and live backup workers in real-time.",
+    url: "https://github.mishrashardendu22.is-a.dev",
+    siteName: "Backup Observatory",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Backup Observatory | GitHub Backup Monitor",
+    description: "Monitor your GitHub repository backup metrics, run execution health, repository archive sizes, and live backup workers in real-time.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
