@@ -26,6 +26,7 @@ interface Message {
   streaming?: boolean;
   timestamp: Date;
   toolCalls?: MessageToolCall[];
+  iteration?: number;
 }
 
 interface AuthState {
@@ -73,6 +74,15 @@ interface DashboardStats {
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
+}
+
+function LoaderPanel({ message }: { message: string }) {
+  return (
+    <div className="ai-loader-panel">
+      <div className="ai-loader-spinner" />
+      <div className="ai-loader-text">{message}</div>
+    </div>
+  );
 }
 
 function formatTime(d: Date) {
@@ -554,11 +564,18 @@ function MessageBubble({ msg }: { msg: Message }) {
             )}
           </div>
         ) : (
-          <span className="ai-thinking">
-            <span />
-            <span />
-            <span />
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--text-secondary)", fontSize: "13.5px", padding: "4px 0" }}>
+            <span className="ai-thinking" style={{ margin: 0 }}>
+              <span />
+              <span />
+              <span />
+            </span>
+            <span>
+              {msg.iteration !== undefined 
+                ? `Agent reasoning (iteration ${msg.iteration + 1} of 5)...` 
+                : "Agent is starting reasoning workflow..."}
+            </span>
+          </div>
         )}
       </div>
     </div>
@@ -569,28 +586,38 @@ function MessageBubble({ msg }: { msg: Message }) {
 
 function WorkflowDiagram({ activeStep }: { activeStep: string }) {
   const steps = [
-    { key: "query", label: "User Query" },
-    { key: "agent", label: "Agent Reasoning" },
-    { key: "tools", label: "Tool Execution" },
-    { key: "response", label: "Generating Answer" },
+    { key: "query", label: "Query received" },
+    { key: "agent", label: "Agent reasoning" },
+    { key: "tools", label: "Tool execution" },
+    { key: "response", label: "Answering" },
   ];
 
   return (
     <div className="ai-workflow-container">
-      <div style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-secondary)", marginBottom: 10 }}>
-        Active Pipeline State
-      </div>
-      <div className="ai-workflow-pipeline">
-        {steps.map((step, idx) => (
-          <div key={step.key} style={{ display: "flex", alignItems: "center", flex: 1 }}>
-            <div className={`ai-workflow-node ${activeStep === step.key ? "active" : ""}`}>
-              {step.label}
+      <span style={{ fontSize: "9px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-secondary)", marginRight: 8, flexShrink: 0 }}>
+        Pipeline:
+      </span>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, overflowX: "auto", flex: 1, whiteSpace: "nowrap" }}>
+        {steps.map((step, idx) => {
+          const active = activeStep === step.key;
+          return (
+            <div key={step.key} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span 
+                style={{ 
+                  color: active ? "var(--accent)" : "var(--text-secondary)", 
+                  fontWeight: active ? 600 : 400,
+                  textShadow: active ? "0 0 8px rgba(212, 168, 50, 0.3)" : "none",
+                  fontSize: "11px"
+                }}
+              >
+                {active ? "● " : ""}{step.label}
+              </span>
+              {idx < steps.length - 1 && (
+                <span style={{ color: "rgba(255,255,255,0.15)", fontSize: "10px" }}>→</span>
+              )}
             </div>
-            {idx < steps.length - 1 && (
-              <div className="ai-workflow-arrow">→</div>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -620,6 +647,25 @@ export default function AIPage() {
     name: string;
     args: any;
   } | null>(null);
+
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [loadMsg, setLoadMsg] = useState("");
+
+  const OBS_LOAD_MESSAGES = [
+    "🔒 Connecting securely to database pool...",
+    "⚙️ Fetching backup execution details...",
+    "📊 Aggregating repository telemetry logs...",
+    "🧬 Analyzing system health signals...",
+    "🔋 Syncing historical report archives...",
+  ];
+
+  useEffect(() => {
+    if (statsLoading || sessionsLoading || messagesLoading) {
+      setLoadMsg(OBS_LOAD_MESSAGES[Math.floor(Math.random() * OBS_LOAD_MESSAGES.length)]);
+    }
+  }, [statsLoading, sessionsLoading, messagesLoading]);
 
   const feedRef = useRef<HTMLDivElement>(null);
 
@@ -667,6 +713,7 @@ export default function AIPage() {
   // ── Database Operations ───────────────────────────────────────────────────
 
   const fetchSessions = useCallback(async (token?: string | null) => {
+    setSessionsLoading(true);
     try {
       const headers: Record<string, string> = {};
       if (token) {
@@ -679,10 +726,13 @@ export default function AIPage() {
       }
     } catch (e) {
       console.error("Failed to fetch sessions", e);
+    } finally {
+      setSessionsLoading(false);
     }
   }, []);
 
   const fetchStats = useCallback(async (token?: string | null) => {
+    setStatsLoading(true);
     try {
       const headers: Record<string, string> = {};
       if (token) {
@@ -695,10 +745,13 @@ export default function AIPage() {
       }
     } catch (e) {
       console.error("Failed to fetch stats", e);
+    } finally {
+      setStatsLoading(false);
     }
   }, []);
 
   const loadMessages = useCallback(async (token: string | null, sessionId: string) => {
+    setMessagesLoading(true);
     try {
       const headers: Record<string, string> = {};
       if (token) {
@@ -718,6 +771,8 @@ export default function AIPage() {
       }
     } catch (e) {
       console.error("Failed to load messages", e);
+    } finally {
+      setMessagesLoading(false);
     }
   }, []);
 
@@ -935,6 +990,15 @@ export default function AIPage() {
                 
                 if (event.type === "info" || event.type === "agent_reasoning") {
                   setActiveStep("agent");
+                  if (event.type === "agent_reasoning") {
+                    setMessages((prev) =>
+                      prev.map((m) =>
+                        m.id === assistantMsg.id
+                          ? { ...m, iteration: event.iteration }
+                          : m
+                      )
+                    );
+                  }
                 } else if (event.type === "confirm_required") {
                   setActiveConfirmation({
                     confirmId: event.confirm_id,
@@ -1076,58 +1140,69 @@ export default function AIPage() {
               Chat History
             </div>
 
-            {sessions.map((s) => (
-              <div 
-                key={s.id}
-                className={`ai-session-item ${activeSessionId === s.id ? "active" : ""}`}
-              >
-                <div className="ai-session-title-wrap" onClick={() => {
-                  setActiveSessionId(s.id);
-                  setCurrentView("chat");
-                }}>
-                  <ChatIcon />
-                  {renamingSessionId === s.id ? (
-                    <input
-                      className="ai-session-rename-input"
-                      value={renameInput}
-                      onChange={(e) => setRenameInput(e.target.value)}
-                      onBlur={() => renameSession(s.id, renameInput)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") renameSession(s.id, renameInput);
-                        if (e.key === "Escape") setRenamingSessionId(null);
-                      }}
-                      autoFocus
-                    />
-                  ) : (
-                    <span className="ai-session-title">{s.session_name}</span>
+            {sessionsLoading && sessions.length === 0 ? (
+              <div style={{ padding: "12px 16px", color: "var(--text-secondary)", fontSize: "12px", display: "flex", alignItems: "center", gap: 8 }}>
+                <div className="ai-loader-spinner" style={{ width: 12, height: 12, borderWidth: 1.5, margin: 0 }} />
+                <span>Syncing history...</span>
+              </div>
+            ) : sessions.length === 0 ? (
+              <div style={{ padding: "12px 16px", color: "var(--text-faint)", fontSize: "12.5px" }}>
+                No active conversations.
+              </div>
+            ) : (
+              sessions.map((s) => (
+                <div 
+                  key={s.id}
+                  className={`ai-session-item ${activeSessionId === s.id ? "active" : ""}`}
+                >
+                  <div className="ai-session-title-wrap" onClick={() => {
+                    setActiveSessionId(s.id);
+                    setCurrentView("chat");
+                  }}>
+                    <ChatIcon />
+                    {renamingSessionId === s.id ? (
+                      <input
+                        className="ai-session-rename-input"
+                        value={renameInput}
+                        onChange={(e) => setRenameInput(e.target.value)}
+                        onBlur={() => renameSession(s.id, renameInput)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") renameSession(s.id, renameInput);
+                          if (e.key === "Escape") setRenamingSessionId(null);
+                        }}
+                        autoFocus
+                      />
+                    ) : (
+                      <span className="ai-session-title">{s.session_name}</span>
+                    )}
+                  </div>
+                  
+                  {renamingSessionId !== s.id && (
+                    <div className="ai-session-actions">
+                      <button 
+                        className="ai-session-action-btn"
+                        onClick={() => {
+                          setRenamingSessionId(s.id);
+                          setRenameInput(s.session_name);
+                        }}
+                        disabled={!isLoggedIn}
+                        aria-label="Rename Chat"
+                      >
+                        <EditIcon />
+                      </button>
+                      <button 
+                        className="ai-session-action-btn delete"
+                        onClick={() => deleteSession(s.id)}
+                        disabled={!isLoggedIn}
+                        aria-label="Delete Chat"
+                      >
+                        <TrashIcon />
+                      </button>
+                    </div>
                   )}
                 </div>
-                
-                {renamingSessionId !== s.id && (
-                  <div className="ai-session-actions">
-                    <button 
-                      className="ai-session-action-btn"
-                      onClick={() => {
-                        setRenamingSessionId(s.id);
-                        setRenameInput(s.session_name);
-                      }}
-                      disabled={!isLoggedIn}
-                      aria-label="Rename Chat"
-                    >
-                      <EditIcon />
-                    </button>
-                    <button 
-                      className="ai-session-action-btn delete"
-                      onClick={() => deleteSession(s.id)}
-                      disabled={!isLoggedIn}
-                      aria-label="Delete Chat"
-                    >
-                      <TrashIcon />
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           {/* Sidebar Footer */}
@@ -1181,15 +1256,19 @@ export default function AIPage() {
             </div>
             
             {/* Dynamic Model & Tools info */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-              <div style={{ fontSize: "10px", color: "var(--text-secondary)", textTransform: "uppercase", marginBottom: 4 }}>
-                Active Model: <code style={{ fontSize: "11px", color: "var(--accent)", textTransform: "none" }}>{stats?.model_name || "loading..."}</code>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              <div style={{ fontSize: "11px", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap" }}>
+                <span>Active Model:</span>
+                <code style={{ fontSize: "11px", color: "var(--accent)", textTransform: "none", background: "rgba(212, 168, 50, 0.06)", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(212, 168, 50, 0.2)" }}>
+                  {stats?.model_name || "loading..."}
+                </code>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {isLoggedIn && (
                 <button 
                   type="button"
                   className="ai-new-chat-btn" 
                   style={{ 
+                    width: "auto",
                     padding: "4px 12px", 
                     fontSize: "11px", 
                     background: "rgba(212, 168, 50, 0.12)", 
@@ -1198,27 +1277,23 @@ export default function AIPage() {
                     marginTop: 0,
                     height: 24,
                     display: "flex",
-                    alignItems: "center"
+                    alignItems: "center",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0
                   }}
                   onClick={() => {
-                    if (!isLoggedIn) {
-                      setLoginError("Please sign in first to run agent queries.");
-                      const inputEl = document.getElementById("ai-username-inline");
-                      if (inputEl) inputEl.focus();
-                    } else {
-                      sendMessage("Generate a full backup health report and email it to me.");
-                    }
+                    sendMessage("Generate a full backup health report and email it to me.");
                   }}
                   disabled={sending}
                 >
                   Generate & Email Report
                 </button>
-                <div className="ai-tools-list" style={{ marginTop: 0 }}>
-                  <span className="ai-tool-badge active">Metrics</span>
-                  <span className="ai-tool-badge active">Backup Runs</span>
-                  <span className="ai-tool-badge active">Logs</span>
-                  <span className="ai-tool-badge active">Analytics</span>
-                </div>
+              )}
+              <div className="ai-tools-list" style={{ marginTop: 0, flexShrink: 0 }}>
+                <span className="ai-tool-badge active">Metrics</span>
+                <span className="ai-tool-badge active">Backup Runs</span>
+                <span className="ai-tool-badge active">Logs</span>
+                <span className="ai-tool-badge active">Analytics</span>
               </div>
             </div>
           </header>
@@ -1231,147 +1306,153 @@ export default function AIPage() {
           {/* Scrollable content area */}
           <div className="ai-content-scroll-area" ref={currentView === "chat" ? feedRef : null}>
             {currentView === "dashboard" ? (
-              <div className="ai-dashboard-panel">
-                <div style={{ marginBottom: "28px" }}>
-                  <div className="page-kicker">Observatory Operations</div>
-                  <h1 className="hero-title" style={{ margin: "4px 0" }}>Backup Agent Dashboard</h1>
-                  <p className="hero-subtitle" style={{ fontSize: "14px", color: "var(--text-secondary)" }}>
-                    Real-time analysis statistics from agent database executions, success parameters, and tool call distribution metrics.
-                  </p>
-                </div>
+              statsLoading && !stats ? (
+                <LoaderPanel message={loadMsg} />
+              ) : (
+                <div className="ai-dashboard-panel">
+                  <div style={{ marginBottom: "28px" }}>
+                    <div className="page-kicker">Observatory Operations</div>
+                    <h1 className="hero-title" style={{ margin: "4px 0" }}>Backup Agent Dashboard</h1>
+                    <p className="hero-subtitle" style={{ fontSize: "14px", color: "var(--text-secondary)" }}>
+                      Real-time analysis statistics from agent database executions, success parameters, and tool call distribution metrics.
+                    </p>
+                  </div>
 
-                {/* Grid stats */}
-                <div className="ai-dashboard-grid">
-                  <div className="ai-dashboard-card">
-                    <div className="ai-card-title">Total Conversations</div>
-                    <div className="ai-card-value">{stats?.total_conversations ?? 0}</div>
-                  </div>
-                  <div className="ai-dashboard-card">
-                    <div className="ai-card-title">Agent Executions</div>
-                    <div className="ai-card-value">{stats?.total_agent_runs ?? 0}</div>
-                  </div>
-                  <div className="ai-dashboard-card">
-                    <div className="ai-card-title">Model Success Rate</div>
-                    <div className="ai-card-value" style={{ color: "var(--accent)" }}>
-                      {stats ? `${stats.success_rate.toFixed(1)}%` : "100.0%"}
+                  {/* Grid stats */}
+                  <div className="ai-dashboard-grid">
+                    <div className="ai-dashboard-card">
+                      <div className="ai-card-title">Total Conversations</div>
+                      <div className="ai-card-value">{stats?.total_conversations ?? 0}</div>
+                    </div>
+                    <div className="ai-dashboard-card">
+                      <div className="ai-card-title">Agent Executions</div>
+                      <div className="ai-card-value">{stats?.total_agent_runs ?? 0}</div>
+                    </div>
+                    <div className="ai-dashboard-card">
+                      <div className="ai-card-title">Model Success Rate</div>
+                      <div className="ai-card-value" style={{ color: "var(--accent)" }}>
+                        {stats ? `${stats.success_rate.toFixed(1)}%` : "100.0%"}
+                      </div>
+                    </div>
+                    <div className="ai-dashboard-card">
+                      <div className="ai-card-title">Database Memory</div>
+                      <div className="ai-card-value">{stats?.memory_stats.total_messages ?? 0} msgs</div>
                     </div>
                   </div>
-                  <div className="ai-dashboard-card">
-                    <div className="ai-card-title">Database Memory</div>
-                    <div className="ai-card-value">{stats?.memory_stats.total_messages ?? 0} msgs</div>
-                  </div>
-                </div>
 
-                {/* Live Tool Calls Distribution */}
-                <div className="ai-dashboard-section-title">Telemetry Tool Call Statistics</div>
-                <div className="ai-rich-table-container" style={{ marginBottom: 32 }}>
-                  <table className="ai-rich-table">
-                    <thead>
-                      <tr>
-                        <th>Tool Name</th>
-                        <th>Invocations</th>
-                        <th>Avg Latency</th>
-                        <th>Success Rate</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {stats?.tool_usage && stats.tool_usage.length > 0 ? (
-                        stats.tool_usage.map((tool, idx) => (
-                          <tr key={idx}>
-                            <td style={{ fontFamily: "monospace", color: "var(--accent)", fontSize: "12.5px" }}>{tool.name}</td>
-                            <td>{tool.count} runs</td>
-                            <td>{tool.avg_duration.toFixed(0)} ms</td>
-                            <td>
-                              <span className={`badge ${tool.success_rate > 90 ? "badge-success" : "badge-warning"}`}>
-                                {tool.success_rate.toFixed(1)}%
-                              </span>
+                  {/* Live Tool Calls Distribution */}
+                  <div className="ai-dashboard-section-title">Telemetry Tool Call Statistics</div>
+                  <div className="ai-rich-table-container" style={{ marginBottom: 32 }}>
+                    <table className="ai-rich-table">
+                      <thead>
+                        <tr>
+                          <th>Tool Name</th>
+                          <th>Invocations</th>
+                          <th>Avg Latency</th>
+                          <th>Success Rate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {stats?.tool_usage && stats.tool_usage.length > 0 ? (
+                          stats.tool_usage.map((tool, idx) => (
+                            <tr key={idx}>
+                              <td style={{ fontFamily: "monospace", color: "var(--accent)", fontSize: "12.5px" }}>{tool.name}</td>
+                              <td>{tool.count} runs</td>
+                              <td>{tool.avg_duration.toFixed(0)} ms</td>
+                              <td>
+                                <span className={`badge ${tool.success_rate > 90 ? "badge-success" : "badge-warning"}`}>
+                                  {tool.success_rate.toFixed(1)}%
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={4} style={{ textAlign: "center", color: "var(--text-secondary)", padding: 20 }}>
+                              No tool call logs recorded in the database yet.
                             </td>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={4} style={{ textAlign: "center", color: "var(--text-secondary)", padding: 20 }}>
-                            No tool call logs recorded in the database yet.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
 
-                {/* Recent Activity & Pipeline Info */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 32 }}>
-                  <div>
-                    <div className="ai-dashboard-section-title">Recent Agent Tasks</div>
-                    <div className="ai-recent-activity-list">
-                      {stats?.recent_activity && stats.recent_activity.length > 0 ? (
-                        stats.recent_activity.map((act) => (
-                          <div className="ai-activity-row" key={act.request_id}>
-                            <div className="ai-activity-info">
-                              <span className="ai-activity-question">"{act.question}"</span>
-                              <span className="ai-activity-time">{formatDate(act.created_at)}</span>
+                  {/* Recent Activity & Pipeline Info */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 32 }}>
+                    <div>
+                      <div className="ai-dashboard-section-title">Recent Agent Tasks</div>
+                      <div className="ai-recent-activity-list">
+                        {stats?.recent_activity && stats.recent_activity.length > 0 ? (
+                          stats.recent_activity.map((act) => (
+                            <div className="ai-activity-row" key={act.request_id}>
+                              <div className="ai-activity-info">
+                                <span className="ai-activity-question">"{act.question}"</span>
+                                <span className="ai-activity-time">{formatDate(act.created_at)}</span>
+                              </div>
+                              <span className={`badge ${act.status === "completed" ? "badge-success" : "badge-error"}`}>
+                                {act.status}
+                              </span>
                             </div>
-                            <span className={`badge ${act.status === "completed" ? "badge-success" : "badge-error"}`}>
-                              {act.status}
-                            </span>
+                          ))
+                        ) : (
+                          <div style={{ padding: 16, textAlign: "center", color: "var(--text-secondary)" }}>
+                            No recent agent tasks logged.
                           </div>
-                        ))
-                      ) : (
-                        <div style={{ padding: 16, textAlign: "center", color: "var(--text-secondary)" }}>
-                          No recent agent tasks logged.
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="ai-dashboard-section-title">Agent System Details</div>
+                      <div className="ai-dashboard-card" style={{ height: "calc(100% - 40px)", display: "flex", flexDirection: "column", gap: 12 }}>
+                        <div>
+                          <strong style={{ fontSize: "13px", display: "block" }}>Identity & Branding</strong>
+                          <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "var(--text-secondary)" }}>
+                            Model: <code style={{ fontSize: "11px", textTransform: "none" }}>{stats?.model_name || "loading..."}</code>. Security via JWT Bearer Token, fully authenticated and logged.
+                          </p>
                         </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="ai-dashboard-section-title">Agent System Details</div>
-                    <div className="ai-dashboard-card" style={{ height: "calc(100% - 40px)", display: "flex", flexDirection: "column", gap: 12 }}>
-                      <div>
-                        <strong style={{ fontSize: "13px", display: "block" }}>Identity & Branding</strong>
-                        <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "var(--text-secondary)" }}>
-                          Model: <code style={{ fontSize: "11px", textTransform: "none" }}>{stats?.model_name || "loading..."}</code>. Security via JWT Bearer Token, fully authenticated and logged.
-                        </p>
-                      </div>
-                      <div>
-                        <strong style={{ fontSize: "13px", display: "block" }}>Reasoning Pipeline</strong>
-                        <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "var(--text-secondary)" }}>
-                          Processes natural query {"→"} matches telemetry tools {"→"} loads Neon SQL session memory {"→"} generates contextual response.
-                        </p>
-                      </div>
-                      <div>
-                        <strong style={{ fontSize: "13px", display: "block" }}>Observability Parameters</strong>
-                        <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "var(--text-secondary)" }}>
-                          Database status: <span style={{ color: "#22c55e", fontWeight: "bold" }}>{stats?.system_health.database ?? "Healthy"}</span>.
-                          API status: <span style={{ color: "#22c55e", fontWeight: "bold" }}>Operational</span>.
-                        </p>
+                        <div>
+                          <strong style={{ fontSize: "13px", display: "block" }}>Reasoning Pipeline</strong>
+                          <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "var(--text-secondary)" }}>
+                            Processes natural query {"→"} matches telemetry tools {"→"} loads Neon SQL session memory {"→"} generates contextual response.
+                          </p>
+                        </div>
+                        <div>
+                          <strong style={{ fontSize: "13px", display: "block" }}>Observability Parameters</strong>
+                          <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "var(--text-secondary)" }}>
+                            Database status: <span style={{ color: "#22c55e", fontWeight: "bold" }}>{stats?.system_health.database ?? "Healthy"}</span>.
+                            API status: <span style={{ color: "#22c55e", fontWeight: "bold" }}>Operational</span>.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Suggested Prompts if starting */}
-                <div className="ai-dashboard-section-title">Ask the Agent About Backups</div>
-                <div className="premadeGrid" style={{ marginTop: 12 }}>
-                  {PREMADE_PROMPTS.map((prompt) => (
-                    <button
-                      key={prompt}
-                      type="button"
-                      className="premadeBtn"
-                      onClick={() => sendMessage(prompt)}
-                      disabled={sending}
-                    >
-                      {prompt}
-                    </button>
-                  ))}
+                  {/* Suggested Prompts if starting */}
+                  <div className="ai-dashboard-section-title">Ask the Agent About Backups</div>
+                  <div className="premadeGrid" style={{ marginTop: 12 }}>
+                    {PREMADE_PROMPTS.map((prompt) => (
+                      <button
+                        key={prompt}
+                        type="button"
+                        className="premadeBtn"
+                        onClick={() => sendMessage(prompt)}
+                        disabled={sending}
+                      >
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )
             ) : (
               /* Chat view */
               <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                 {/* Chat messages */}
                 <div className="ai-chat-messages">
-                  {messages.length === 0 ? (
+                  {messagesLoading && messages.length === 0 ? (
+                    <LoaderPanel message={loadMsg} />
+                  ) : messages.length === 0 ? (
                     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "200px", color: "var(--text-secondary)", fontSize: "14px" }}>
                       No messages in this chat session yet. Ask a question below to start.
                     </div>
@@ -1388,10 +1469,11 @@ export default function AIPage() {
           {/* Fixed Composer Wrap at the bottom of both views */}
           <div className="ai-chat-composer-wrap">
             {isLoggedIn ? (
-              <form onSubmit={handleSubmit} className="composerWrap">
+              <form onSubmit={handleSubmit} className="composerWrap" style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 12, padding: "10px 14px" }}>
                 <textarea
                   id="ai-composer"
                   className="composer"
+                  style={{ flex: 1, minHeight: "38px", height: "38px", maxHeight: "80px", resize: "none", margin: 0, padding: "8px 12px", display: "flex", alignItems: "center" }}
                   placeholder={currentView === "dashboard" ? "Type here to start a new analysis chat..." : "Ask the agent anything about your backups..."}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -1402,23 +1484,24 @@ export default function AIPage() {
                     }
                   }}
                   disabled={sending}
-                  rows={2}
+                  rows={1}
                   aria-label="Message to agent"
                 />
-                <div className="composerActions">
-                  <span className="promptHint">
-                    {sending
-                      ? "Agent is executing reasoning workflow…"
-                      : "Press Enter to send · Shift+Enter for new line"}
-                  </span>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, flexShrink: 0 }}>
                   <button
                     id="ai-send-btn"
                     type="submit"
                     className="sendBtn"
+                    style={{ height: "32px", padding: "0 16px", marginTop: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12.5px" }}
                     disabled={sending || !input.trim()}
                   >
                     {sending ? "Processing…" : "Execute Reasoning →"}
                   </button>
+                  <span className="promptHint" style={{ fontSize: "10px", margin: 0, color: "var(--text-secondary)", whiteSpace: "nowrap" }}>
+                    {sending
+                      ? "Agent reasoning…"
+                      : "Enter to send · Shift+Enter new line"}
+                  </span>
                 </div>
               </form>
             ) : (
