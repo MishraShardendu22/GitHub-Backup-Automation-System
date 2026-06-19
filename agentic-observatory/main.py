@@ -218,6 +218,7 @@ async def chat_stream(request: ChatRequest, current_user: str = Depends(get_curr
         tool_results = []
         request_id = None
 
+        # async generator to stream events from the agent
         async for event_str in stream_agent(request.question, session_id=request.session_id):
             sse_token = event_str.replace("\n", "\ndata: ")
             yield f"data: {sse_token}\n\n"
@@ -257,6 +258,7 @@ async def chat_stream(request: ChatRequest, current_user: str = Depends(get_curr
             )
             await persistence_store.save_investigation(investigation)
 
+    # Return a streaming response that streams events to the client
     return StreamingResponse(
         event_generator(),
         media_type="text/event-stream",
@@ -362,3 +364,5 @@ async def send_saved_report(
             error_message=str(exc),
         )
         return success_response(data=updated, message=f"Failed to send report: {str(exc)}")
+
+

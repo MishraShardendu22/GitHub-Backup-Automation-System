@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSessions } from "@/hooks/useSessions";
 import type { AuthState, Session } from "@/types";
@@ -55,11 +55,21 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
   );
 
   // Reset chat view states on logout
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     setActiveSessionId(null);
     setCurrentView("dashboard");
-  };
+  }, [logout]);
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      handleLogout();
+    };
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+    return () => {
+      window.removeEventListener("auth:unauthorized", handleUnauthorized);
+    };
+  }, [handleLogout]);
 
   return (
     <AIContext.Provider

@@ -27,6 +27,11 @@ export async function fetchAPI<T>(
       });
 
       if (!res.ok) {
+        if (res.status === 401) {
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+          }
+        }
         if (res.status >= 500 && attempt < retries) {
           await sleep(retryDelay * (attempt + 1));
           continue;

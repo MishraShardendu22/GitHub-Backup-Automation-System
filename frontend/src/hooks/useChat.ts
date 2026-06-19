@@ -26,7 +26,11 @@ export function useChat(token: string | null, sessionId: string | null) {
         timestamp: new Date(msg.created_at || Date.now()),
         toolCalls: msg.tool_calls || [],
       }));
-      setMessages(formatted);
+      setMessages((prev) => {
+        const formattedIds = new Set(formatted.map((m) => m.id));
+        const optimistic = prev.filter((m) => !formattedIds.has(m.id));
+        return [...formatted, ...optimistic];
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load messages");
       console.error("Failed to load messages", e);

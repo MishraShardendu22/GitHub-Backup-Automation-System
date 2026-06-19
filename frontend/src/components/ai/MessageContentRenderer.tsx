@@ -245,7 +245,7 @@ export function MessageContentRenderer({ content }: { content: string }) {
                   key={lidx}
                   style={{ margin: 0, fontSize: "13.5px", lineHeight: "1.6" }}
                 >
-                  {line}
+                  {renderMarkdownInline(line)}
                 </p>
               );
             })}
