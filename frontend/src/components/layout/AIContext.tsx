@@ -20,11 +20,6 @@ interface AIContextType {
   createSession: (id: string, name: string) => Promise<void>;
   renameSession: (id: string, name: string) => Promise<void>;
   deleteSession: (id: string) => Promise<void>;
-
-  activeSessionId: string | null;
-  setActiveSessionId: (id: string | null) => void;
-  currentView: "dashboard" | "chat";
-  setCurrentView: (view: "dashboard" | "chat") => void;
 }
 
 const AIContext = createContext<AIContextType | undefined>(undefined);
@@ -49,16 +44,9 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
     deleteSession,
   } = useSessions(auth.token);
 
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<"dashboard" | "chat">(
-    "dashboard",
-  );
-
   // Reset chat view states on logout
   const handleLogout = useCallback(() => {
     logout();
-    setActiveSessionId(null);
-    setCurrentView("dashboard");
   }, [logout]);
 
   useEffect(() => {
@@ -86,10 +74,6 @@ export function AIContextProvider({ children }: { children: React.ReactNode }) {
         createSession,
         renameSession,
         deleteSession,
-        activeSessionId,
-        setActiveSessionId,
-        currentView,
-        setCurrentView,
       }}
     >
       {children}

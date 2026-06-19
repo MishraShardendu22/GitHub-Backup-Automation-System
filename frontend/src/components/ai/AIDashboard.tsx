@@ -6,6 +6,7 @@ import { useAIContext } from "@/components/layout/AIContext";
 import { LoaderPanel, MetricCard, ToolBadge } from "@/components/ui";
 import { LOADING_MESSAGES, PREMADE_PROMPTS } from "@/constants";
 import { useChat } from "@/hooks/useChat";
+import { useParams, useRouter } from "next/navigation";
 import { useStats } from "@/hooks/useStats";
 import { useStreamingAgent } from "@/hooks/useStreamingAgent";
 
@@ -37,12 +38,22 @@ export function AIDashboard() {
     sessionsLoading,
     sessionsError,
     createSession,
-    activeSessionId,
-    setActiveSessionId,
-    currentView,
-    setCurrentView,
     logout,
   } = useAIContext();
+
+  const params = useParams();
+  const router = useRouter();
+  
+  // Local state for seamless navigation after creating a session
+  const [localSessionId, setLocalSessionId] = useState<string | null>(null);
+
+  // Clear local override when URL params change (e.g. Back/Forward navigation)
+  useEffect(() => {
+    setLocalSessionId(null);
+  }, [params?.id]);
+
+  const activeSessionId = localSessionId || (params?.id as string | undefined) || null;
+  const currentView = activeSessionId ? "chat" : "dashboard";
 
   const {
     stats,
@@ -120,10 +131,9 @@ export function AIDashboard() {
             (question.trim().length > 30 ? "..." : ""),
         );
         sessionId = newSessionId;
-        setActiveSessionId(newSessionId);
-        setCurrentView("chat");
-      } else {
-        setCurrentView("chat");
+        // Soft navigate to preserve chat component state for streaming
+        window.history.replaceState(null, '', `/ai/${newSessionId}`);
+        setLocalSessionId(newSessionId);
       }
 
       await sendStreamMessage(

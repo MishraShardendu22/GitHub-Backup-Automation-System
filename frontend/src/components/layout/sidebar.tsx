@@ -95,10 +95,6 @@ export default function Sidebar({
     isAuthenticated,
     sessions,
     sessionsLoading,
-    activeSessionId,
-    setActiveSessionId,
-    currentView,
-    setCurrentView,
     createSession,
     renameSession,
     deleteSession,
@@ -195,9 +191,7 @@ export default function Sidebar({
     const newSessionId = crypto.randomUUID();
     try {
       await createSession(newSessionId, "New Analysis Session");
-      setActiveSessionId(newSessionId);
-      setCurrentView("chat");
-      router.push("/ai");
+      router.push(`/ai/${newSessionId}`);
       onCloseMobile?.();
     } catch (err) {
       console.error("Failed to create session:", err);
@@ -210,9 +204,8 @@ export default function Sidebar({
     e.stopPropagation();
     try {
       await deleteSession(id);
-      if (activeSessionId === id) {
-        setActiveSessionId(null);
-        setCurrentView("dashboard");
+      if (pathname === `/ai/${id}`) {
+        router.push("/ai");
       }
     } catch (err) {
       console.error("Failed to delete session:", err);
@@ -504,10 +497,8 @@ export default function Sidebar({
                   {/* Action 2: Stats Dashboard */}
                   <button
                     type="button"
-                    className={`tree-node ${pathname === "/ai" && currentView === "dashboard" ? "active" : ""}`}
+                    className={`tree-node ${pathname === "/ai" ? "active" : ""}`}
                     onClick={() => {
-                      setActiveSessionId(null);
-                      setCurrentView("dashboard");
                       router.push("/ai");
                       onCloseMobile?.();
                     }}
@@ -572,10 +563,7 @@ export default function Sidebar({
                     </div>
                   ) : (
                     sessions.map((s) => {
-                      const isSessionActive =
-                        pathname === "/ai" &&
-                        currentView === "chat" &&
-                        activeSessionId === s.id;
+                      const isSessionActive = pathname === `/ai/${s.id}`;
 
                       return (
                         <div
@@ -592,9 +580,7 @@ export default function Sidebar({
                           <button
                             type="button"
                             onClick={() => {
-                              setActiveSessionId(s.id);
-                              setCurrentView("chat");
-                              router.push("/ai");
+                              router.push(`/ai/${s.id}`);
                               onCloseMobile?.();
                             }}
                             style={{
