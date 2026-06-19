@@ -174,6 +174,7 @@ export default function Sidebar({
   const isActive = (href?: string) => {
     if (!href) return false;
     if (href === "/") return pathname === "/";
+    if (href === "/analytics") return pathname === "/analytics";
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
@@ -778,6 +779,7 @@ export default function Sidebar({
                 alignItems: "center",
                 justifyContent: "space-between",
                 gap: 8,
+                minWidth: "248px",
               }}
             >
               {isAuthenticated ? (
@@ -839,6 +841,7 @@ export default function Sidebar({
                     transition: "all 0.15s",
                     textAlign: "center",
                     width: "100%",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   Sign In

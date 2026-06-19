@@ -45,7 +45,7 @@ body {
   background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-sans);
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
@@ -116,7 +116,7 @@ textarea {
 }
 
 .page-kicker {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -132,7 +132,7 @@ textarea {
 }
 
 .page-subtitle {
-  font-size: 16px;
+  font-size: 18px;
   color: var(--text-secondary);
   max-width: 720px;
   line-height: 1.7;

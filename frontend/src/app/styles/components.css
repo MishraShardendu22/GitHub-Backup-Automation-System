@@ -56,7 +56,7 @@
 }
 
 .stat-value {
-  font-size: clamp(24px, 2.5vw, 36px);
+  font-size: clamp(28px, 3vw, 42px);
   font-weight: 600;
   color: var(--text);
   line-height: 1.1;
@@ -64,7 +64,7 @@
 }
 
 .stat-value--md {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 600;
   line-height: 1.2;
 }
@@ -84,7 +84,7 @@
   gap: 6px;
   padding: 4px 12px;
   border-radius: var(--radius-sm);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
 }
 
@@ -110,7 +110,7 @@
   gap: 10px;
   padding: 10px 20px;
   border-radius: var(--radius-md);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -172,7 +172,7 @@
 .table th {
   text-align: left;
   padding: 16px 24px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -183,7 +183,7 @@
 
 .table td {
   padding: 16px 24px;
-  font-size: 15px;
+  font-size: 17px;
   border-bottom: 1px solid var(--border-light);
   color: var(--text);
   transition: background 0.2s;
@@ -209,7 +209,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   color: var(--text);
-  font-size: 15px;
+  font-size: 17px;
   font-family: var(--font-sans);
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -231,7 +231,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   color: var(--text);
-  font-size: 15px;
+  font-size: 17px;
   font-family: var(--font-sans);
   outline: none;
   resize: vertical;
@@ -250,7 +250,7 @@
   align-items: center;
   padding: 8px 18px;
   border-radius: 99px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.03);
