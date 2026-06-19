@@ -2,6 +2,13 @@
 
 A compact, multi-service system that clones, archives, and stores GitHub repositories into a single backup repository. It features a Go-based CLI worker, a Go/Postgres REST API & WebSocket backend, a Next.js frontend dashboard, and an AI-driven Agentic Observatory.
 
+## Live
+
+- **Live Demo**: https://github.mishrashardendu22.is-a.dev
+- **YouTube Video**: https://www.youtube.com/watch?v=be0UBwk2asc
+
+---
+
 ## Architecture Overview
 
 This repository is structured as a monorepo containing the following core services:
@@ -46,13 +53,6 @@ For detailed instructions on running and developing each service, please refer t
 - 📖 **[Backend Documentation](./backend/README.md)**
 - 📖 **[Frontend Documentation](./frontend/README.md)**
 - 📖 **[Agentic Observatory Documentation](./agentic-observatory/README.md)**
-
----
-
-## Live
-
-- **Live Demo**: https://github.mishrashardendu22.is-a.dev
-- **YouTube Video**: https://www.youtube.com/watch?v=be0UBwk2asc
 
 ---
 
