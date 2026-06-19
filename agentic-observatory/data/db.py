@@ -61,24 +61,6 @@ ai_tool_calls = Table(
 )
 Index("idx_ai_tool_calls_request_id", ai_tool_calls.c.request_id)
 
-generated_reports = Table(
-    "generated_reports",
-    metadata,
-    Column("id", PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
-    Column("report_type", String, nullable=False),
-    Column("subject", String, nullable=False),
-    Column("recipients", JSONB, nullable=False),
-    Column("generated_at", DateTime(timezone=True), nullable=False, server_default=text("NOW()")),
-    Column("sent_at", DateTime(timezone=True), nullable=True),
-    Column("status", String, nullable=False, default="pending"),
-    Column("error_message", Text, nullable=True),
-    Column("content_markdown", Text, nullable=True),
-    Column("content_html", Text, nullable=True),
-    Column("pdf_path", String, nullable=True),
-    Column("created_at", DateTime(timezone=True), nullable=False, server_default=text("NOW()")),
-)
-Index("idx_generated_reports_report_type", generated_reports.c.report_type)
-Index("idx_generated_reports_generated_at", generated_reports.c.generated_at)
 
 investigations = Table(
     "investigations",

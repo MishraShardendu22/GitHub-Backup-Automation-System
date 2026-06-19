@@ -6,7 +6,6 @@ from data.db import (
     async_session,
     investigations,
     ai_chat_messages,
-    generated_reports,
     ai_chat_sessions,
 )
 from typing import Any
@@ -143,76 +142,6 @@ class InvestigationStore:
             )
             return [dict(row) for row in result.mappings().all()]
 
-    async def get_report(self, report_id: str) -> dict[str, Any] | None:
-        await self._check()
-        async with self.session_factory() as session:
-            result = await session.execute(
-                select(generated_reports).where(generated_reports.c.id == report_id)
-            )
-            row = result.mappings().first()
-            return dict(row) if row else None
-
-    async def save_report(
-        self,
-        subject: str,
-        report_type: str,
-        recipients: list[str],
-        status: str = "generated",
-        pdf_path: str | None = None,
-        content_html: str | None = None,
-        error_message: str | None = None,
-        content_markdown: str | None = None,
-    ) -> dict[str, Any]:
-        await self._check()
-        now = datetime.utcnow()
-        async with self.session_factory() as session:
-            result = await session.execute(
-                insert(generated_reports)
-                .values(
-                    report_type=report_type,
-                    subject=subject,
-                    recipients=recipients,
-                    content_html=content_html,
-                    content_markdown=content_markdown,
-                    pdf_path=pdf_path,
-                    status=status,
-                    error_message=error_message,
-                    generated_at=now,
-                    created_at=now,
-                )
-                .returning(generated_reports)
-            )
-            await session.commit()
-            row = result.mappings().first()
-            return dict(row) if row else {}
-
-    async def update_report_status(
-        self,
-        report_id: str,
-        status: str,
-        sent_at: datetime | None = None,
-        error_message: str | None = None,
-        pdf_path: str | None = None,
-    ) -> dict[str, Any]:
-        await self._check()
-        values = {"status": status}
-        if sent_at is not None:
-            values["sent_at"] = sent_at
-        if error_message is not None:
-            values["error_message"] = error_message
-        if pdf_path is not None:
-            values["pdf_path"] = pdf_path
-
-        async with self.session_factory() as session:
-            result = await session.execute(
-                update(generated_reports)
-                .where(generated_reports.c.id == report_id)
-                .values(**values)
-                .returning(generated_reports)
-            )
-            await session.commit()
-            row = result.mappings().first()
-            return dict(row) if row else {}
 
     async def create_session(
         self,
