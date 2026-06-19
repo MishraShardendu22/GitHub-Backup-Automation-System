@@ -92,9 +92,9 @@ export default async function AnalyticsOverviewPage({
             >
               <div
                 style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 7,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
                   background: "var(--accent-bg)",
                   display: "flex",
                   alignItems: "center",
@@ -103,8 +103,8 @@ export default async function AnalyticsOverviewPage({
                 }}
               >
                 <svg
-                  width="14"
-                  height="14"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="var(--accent)"
@@ -119,14 +119,14 @@ export default async function AnalyticsOverviewPage({
                 </svg>
               </div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 0 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 0 }}>
                   Storage
                 </div>
                 <div
                   style={{
-                    fontSize: 10,
+                    fontSize: 13,
                     color: "var(--text-muted)",
-                    marginTop: 1,
+                    marginTop: 2,
                   }}
                 >
                   Last {days} days
@@ -174,9 +174,9 @@ export default async function AnalyticsOverviewPage({
             >
               <div
                 style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 7,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
                   background: "var(--accent-bg)",
                   display: "flex",
                   alignItems: "center",
@@ -185,8 +185,8 @@ export default async function AnalyticsOverviewPage({
                 }}
               >
                 <svg
-                  width="14"
-                  height="14"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="var(--accent)"
@@ -201,14 +201,14 @@ export default async function AnalyticsOverviewPage({
                 </svg>
               </div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 0 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 0 }}>
                   Explore
                 </div>
                 <div
                   style={{
-                    fontSize: 10,
+                    fontSize: 13,
                     color: "var(--text-muted)",
-                    marginTop: 1,
+                    marginTop: 2,
                   }}
                 >
                   Detailed historical data
@@ -280,13 +280,13 @@ function InsufficientData({ days }: { days: number }) {
         <p
           style={{
             fontWeight: 600,
-            fontSize: 12.5,
+            fontSize: 14.5,
             color: "var(--text-secondary)",
           }}
         >
           No data for the {days}-day window
         </p>
-        <p style={{ fontSize: 11.5, marginTop: 3, color: "var(--text-muted)" }}>
+        <p style={{ fontSize: 13, marginTop: 4, color: "var(--text-muted)" }}>
           No backup runs were recorded in the last {days} days. Try a longer
           range or start the backup worker.
         </p>
@@ -322,10 +322,10 @@ function StorageStat({
         gap: 3,
       }}
     >
-      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>{label}</div>
+      <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{label}</div>
       <div
         style={{
-          fontSize: 14,
+          fontSize: 16,
           fontWeight: 600,
           color: accent ? "var(--accent)" : "var(--text-primary)",
           overflow: "hidden",
@@ -383,7 +383,7 @@ function DiveLink({
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontSize: 12.5,
+            fontSize: 14,
             fontWeight: 600,
             color: "var(--text-primary)",
           }}
@@ -391,7 +391,7 @@ function DiveLink({
           {label}
         </div>
         <div
-          style={{ fontSize: 10.5, color: "var(--text-muted)", marginTop: 1 }}
+          style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 2 }}
         >
           {desc}
         </div>

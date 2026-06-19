@@ -50,7 +50,7 @@ export default async function DashboardPage() {
   return (
     <div className="page">
       {/* ── Hero / Status Block ───────────────────────────────────────── */}
-      <section className="card section-card" style={{ padding: "24px 32px", background: "linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(24, 24, 27, 0.8) 100%)", borderTop: "2px solid var(--accent)" }}>
+      <section className="card section-card" style={{ padding: "32px 48px", background: "linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(24, 24, 27, 0.8) 100%)", borderTop: "2px solid var(--accent)" }}>
         <div className="page-head" style={{ marginBottom: 16 }}>
           <div>
             <div className="page-kicker">Backup Operations Overview</div>
@@ -61,11 +61,11 @@ export default async function DashboardPage() {
           </div>
           {latestRun && (
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 6 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 8 }}>
                 Last Execution
               </div>
               <StatusBadge status={latestRun.status} />
-              <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 6 }}>
+              <div style={{ fontSize: 14, color: "var(--text-secondary)", marginTop: 8 }}>
                 {formatDate(latestRun.started_at)}
               </div>
             </div>
@@ -139,16 +139,16 @@ export default async function DashboardPage() {
             <div>
               <div
                 className="section-title"
-                style={{ fontSize: 13, fontWeight: 600 }}
+                style={{ fontSize: 16, fontWeight: 600 }}
               >
                 Latest backup run — #{latestRun.id}
               </div>
               <div
                 className="section-desc"
                 style={{
-                  fontSize: 11.5,
+                  fontSize: 14,
                   color: "var(--text-muted)",
-                  marginTop: 2,
+                  marginTop: 4,
                 }}
               >
                 Started {formatDate(latestRun.started_at)} ·{" "}
@@ -158,7 +158,7 @@ export default async function DashboardPage() {
             <Link
               href={`/backups/${latestRun.id}`}
               className="btn btn-outline"
-              style={{ fontSize: 11 }}
+              style={{ fontSize: 13 }}
             >
               View full results →
             </Link>
@@ -263,20 +263,20 @@ function NavCard({
       <div
         className="card"
         style={{
-          padding: "14px 16px",
+          padding: "20px 24px",
           cursor: "pointer",
           display: "flex",
           flexDirection: "column",
-          gap: 8,
+          gap: 12,
           height: "100%",
           transition: "border-color 0.15s",
         }}
       >
         <div
           style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
+            width: 40,
+            height: 40,
+            borderRadius: 10,
             background: "var(--accent-bg)",
             display: "flex",
             alignItems: "center",
@@ -284,8 +284,8 @@ function NavCard({
           }}
         >
           <svg
-            width="16"
-            height="16"
+            width="20"
+            height="20"
             viewBox="0 0 24 24"
             fill="none"
             stroke="var(--accent)"
@@ -298,11 +298,11 @@ function NavCard({
           </svg>
         </div>
         <div>
-          <div style={{ fontWeight: 600, fontSize: 13, color: "var(--text)" }}>
+          <div style={{ fontWeight: 600, fontSize: 15, color: "var(--text)" }}>
             {title}
           </div>
           <div
-            style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 2 }}
+            style={{ fontSize: 13.5, color: "var(--text-muted)", marginTop: 4 }}
           >
             {desc}
           </div>

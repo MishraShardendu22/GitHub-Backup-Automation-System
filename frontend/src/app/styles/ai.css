@@ -40,7 +40,7 @@ body.ai-page-active .composer {
   min-height: 40px;
   max-height: 120px;
   padding: 8px 12px;
-  font-size: 13.5px;
+  font-size: 15px;
 }
 
 body.ai-page-active .app-layout {
@@ -127,7 +127,7 @@ body.ai-page-active .app-main {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
@@ -156,8 +156,8 @@ body.ai-page-active .app-main {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text-secondary);
-  font-size: 9px;
-  padding: 2px 6px;
+  font-size: 11px;
+  padding: 4px 8px;
   border-radius: 4px;
   text-transform: uppercase;
 }
@@ -190,7 +190,7 @@ body.ai-page-active .app-main {
   color: var(--text);
   padding: 16px 18px;
   outline: none;
-  font-size: 15px;
+  font-size: 16px;
   font-family: var(--font-sans);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
@@ -210,7 +210,7 @@ body.ai-page-active .app-main {
   padding: 10px 22px;
   background: var(--accent);
   color: #09090b;
-  font-size: 13px;
+  font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 700;
@@ -237,7 +237,7 @@ body.ai-page-active .app-main {
 
 .promptHint {
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.7;
 }
 
@@ -255,7 +255,7 @@ body.ai-page-active .app-main {
   border-radius: var(--radius-md);
   padding: 10px 10px;
   color: var(--text);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.75;
   cursor: pointer;
   transition:
@@ -282,7 +282,7 @@ body.ai-page-active .app-main {
 }
 
 .msgHeader {
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-weight: 700;
@@ -337,7 +337,7 @@ body.ai-page-active .app-main {
 }
 
 .ai-login-label {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-secondary);
   line-height: 1.5;
   margin-bottom: 2px;
@@ -359,8 +359,8 @@ body.ai-page-active .app-main {
   background: rgba(255, 255, 255, 0.06);
   color: var(--text);
   padding: 10px 14px;
-  font-size: 13.5px;
-  height: 38px;
+  font-size: 15px;
+  height: 42px;
   outline: none;
   transition:
     border-color 0.15s,
@@ -377,7 +377,7 @@ body.ai-page-active .app-main {
 }
 
 .ai-login-error {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--danger);
   background: var(--danger-bg);
   border: 1px solid rgba(224, 112, 112, 0.22);
@@ -393,7 +393,7 @@ body.ai-page-active .app-main {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 14px;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -512,7 +512,7 @@ body.ai-page-active .app-main {
 }
 
 .ai-card-title {
-  font-size: 11px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--text-secondary);
@@ -520,14 +520,14 @@ body.ai-page-active .app-main {
 }
 
 .ai-card-value {
-  font-size: 26px;
+  font-size: 32px;
   font-weight: 700;
   color: var(--text);
   font-family: var(--font-serif), Georgia, serif;
 }
 
 .ai-dashboard-section-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   margin-bottom: 16px;
   color: var(--text);
@@ -548,7 +548,7 @@ body.ai-page-active .app-main {
   border: none;
   border-radius: 0;
   font-weight: 600;
-  font-size: 12.5px;
+  font-size: 14px;
   cursor: pointer;
   transition:
     transform 0.2s ease,
@@ -567,7 +567,7 @@ body.ai-page-active .app-main {
   border-radius: var(--radius-md);
   margin-bottom: 10px;
   overflow: hidden;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .ai-tool-activity-header {
@@ -622,7 +622,7 @@ body.ai-page-active .app-main {
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-all;
-  font-size: 11px;
+  font-size: 13px;
   color: #c084fc;
 }
 
@@ -637,7 +637,7 @@ body.ai-page-active .app-main {
 .ai-rich-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
   text-align: left;
 }
 
@@ -667,8 +667,8 @@ body.ai-page-active .app-main {
   justify-content: space-between;
   align-items: center;
   background: rgba(0, 0, 0, 0.4);
-  padding: 6px 12px;
-  font-size: 11px;
+  padding: 8px 16px;
+  font-size: 13px;
   font-family: monospace;
   color: var(--text-secondary);
   border-top-left-radius: var(--radius-md);
@@ -725,7 +725,7 @@ body.ai-page-active .app-main {
 .ai-confirm-modal h3 {
   margin-top: 0;
   color: var(--accent);
-  font-size: 18px;
+  font-size: 20px;
   font-family: var(--font-serif);
   margin-bottom: 12px;
   font-weight: 400;
@@ -733,7 +733,7 @@ body.ai-page-active .app-main {
 }
 
 .ai-confirm-modal p {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-secondary);
   margin-bottom: 16px;
   line-height: 1.5;
@@ -744,7 +744,7 @@ body.ai-page-active .app-main {
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 16px;
   border-radius: var(--radius-md);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
   margin-bottom: 24px;
 }
@@ -763,7 +763,7 @@ body.ai-page-active .app-main {
   border-radius: var(--radius-md);
   font-weight: 600;
   cursor: pointer;
-  font-size: 13.5px;
+  font-size: 15px;
   transition: opacity 0.2s;
 }
 
@@ -779,7 +779,7 @@ body.ai-page-active .app-main {
   border-radius: var(--radius-md);
   font-weight: 600;
   cursor: pointer;
-  font-size: 13.5px;
+  font-size: 15px;
   transition: all 0.2s;
 }
 

@@ -1,25 +1,25 @@
 .segmented {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--border-light);
   border-radius: 999px;
-  padding: 4px;
+  padding: 6px;
 }
 
 .segmented-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 16px;
+  padding: 8px 20px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   border: none;
   cursor: pointer;
   background: transparent;
   color: var(--text-secondary);
-  min-height: 32px;
+  min-height: 38px;
   text-decoration: none;
   transition: all 0.2s;
 }
@@ -49,7 +49,7 @@
 
 .metric-grid {
   display: grid;
-  gap: 10px;
+  gap: 16px;
   width: 100%;
 }
 
@@ -58,17 +58,17 @@
 }
 
 .metric-grid--four {
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
 .metric-grid--three {
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
 .split-grid {
   display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   width: 100%;
 }
 
@@ -86,11 +86,11 @@
 
 .log-card {
   padding: 0;
-  min-height: 520px;
+  min-height: 600px;
 }
 
 .log-header {
-  padding: 14px 24px;
+  padding: 18px 32px;
   border-bottom: 1px solid var(--border-light);
   display: flex;
   justify-content: space-between;
@@ -98,20 +98,20 @@
 }
 
 .log-body {
-  height: 580px;
+  height: 680px;
   overflow: auto;
-  padding: 16px 24px;
+  padding: 24px 32px;
   font-family: "SF Mono", "Fira Code", monospace;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
 }
 
 .log-row {
   display: grid;
-  grid-template-columns: 88px 42px minmax(140px, 240px) 1fr;
-  gap: 12px;
+  grid-template-columns: 96px 48px minmax(160px, 280px) 1fr;
+  gap: 16px;
   align-items: start;
-  padding: 6px 0;
+  padding: 8px 0;
 }
 
 /* Log levels */

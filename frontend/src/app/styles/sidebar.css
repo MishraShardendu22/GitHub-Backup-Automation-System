@@ -7,7 +7,7 @@
 .app-content-wrapper {
   flex: 1;
   min-width: 0;
-  margin-left: var(--sidebar-width, 250px);
+  margin-left: var(--sidebar-width, 280px);
   transition: margin-left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
@@ -74,7 +74,7 @@
 }
 
 .global-header-title {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text);
 }
@@ -121,7 +121,7 @@
 }
 
 .global-sidebar-header {
-  height: 56px;
+  height: 64px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -133,11 +133,11 @@
 .global-sidebar-logo-link {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   text-decoration: none;
   color: var(--text);
   font-weight: 700;
-  font-size: 14px;
+  font-size: 15px;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -165,10 +165,10 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 16px 8px;
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
 }
@@ -185,10 +185,10 @@
 .tree-node {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  border-radius: 6px;
-  font-size: 13px;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 15px;
   font-weight: 500;
   text-decoration: none;
   color: var(--text-secondary);
@@ -248,19 +248,19 @@
 .tree-children-container {
   display: flex;
   flex-direction: column;
-  margin-left: 15px;
-  padding-left: 10px;
+  margin-left: 18px;
+  padding-left: 14px;
   border-left: 1px dashed rgba(255, 255, 255, 0.1);
-  margin-top: 2px;
-  margin-bottom: 2px;
-  gap: 2px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  gap: 4px;
 }
 
 /* Sidebar Footer */
 .global-sidebar-footer {
-  padding: 12px 16px;
+  padding: 16px 20px;
   border-top: 1px solid var(--border);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -331,7 +331,7 @@
 
   .global-sidebar.mobile-open {
     transform: translateX(0) !important;
-    width: 250px !important;
+    width: 280px !important;
   }
 
   .sidebar-overlay {

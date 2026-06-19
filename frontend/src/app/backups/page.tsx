@@ -55,7 +55,7 @@ export default async function BackupsPage({
               color: "var(--danger)",
               padding: 40,
               textAlign: "center",
-              fontSize: 13,
+              fontSize: 15,
             }}
           >
             Failed to load backups.
@@ -96,7 +96,7 @@ export default async function BackupsPage({
                         {run.status}
                       </span>
                     </td>
-                    <td data-label="Date" className="text-xs text-secondary">
+                    <td data-label="Date" style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
                       {formatDate(run.started_at)}
                     </td>
                     <td data-label="Duration">
@@ -124,7 +124,7 @@ export default async function BackupsPage({
                       <Link
                         href={`/backups/${run.id}`}
                         className="btn btn-ghost"
-                        style={{ fontSize: 11 }}
+                        style={{ fontSize: 13 }}
                       >
                         View →
                       </Link>

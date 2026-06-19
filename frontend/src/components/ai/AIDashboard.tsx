@@ -194,7 +194,7 @@ export function AIDashboard() {
           >
             <div
               style={{
-                fontSize: "11px",
+                fontSize: "13px",
                 color: "var(--text-secondary)",
                 display: "flex",
                 alignItems: "center",
@@ -205,7 +205,7 @@ export function AIDashboard() {
               <span>Active Model:</span>
               <code
                 style={{
-                  fontSize: "11px",
+                  fontSize: "13px",
                   color: "var(--accent)",
                   textTransform: "none",
                   background: "rgba(139, 92, 246, 0.06)",
@@ -223,8 +223,8 @@ export function AIDashboard() {
                 className="ai-new-chat-btn"
                 style={{
                   width: "auto",
-                  padding: "4px 12px",
-                  fontSize: "11px",
+                  padding: "6px 16px",
+                  fontSize: "13px",
                   background: "rgba(139, 92, 246, 0.12)",
                   borderColor: "var(--accent)",
                   color: "var(--accent)",
@@ -273,7 +273,7 @@ export function AIDashboard() {
                   </h1>
                   <p
                     className="hero-subtitle"
-                    style={{ fontSize: "14px", color: "var(--text-secondary)" }}
+                    style={{ fontSize: "16px", color: "var(--text-secondary)" }}
                   >
                     Real-time analysis statistics from agent database
                     executions, success parameters, and tool call distribution
@@ -326,7 +326,7 @@ export function AIDashboard() {
                               style={{
                                 fontFamily: "monospace",
                                 color: "var(--accent)",
-                                fontSize: "12.5px",
+                                fontSize: "14.5px",
                               }}
                             >
                               {tool.name}
@@ -405,7 +405,7 @@ export function AIDashboard() {
                     alignItems: "center",
                     minHeight: "200px",
                     color: "var(--text-secondary)",
-                    fontSize: "14px",
+                    fontSize: "16px",
                   }}
                 >
                   <LoaderPanel
@@ -420,7 +420,7 @@ export function AIDashboard() {
                     alignItems: "center",
                     minHeight: "200px",
                     color: "var(--text-secondary)",
-                    fontSize: "14px",
+                    fontSize: "16px",
                   }}
                 >
                   No messages in this chat session yet. Ask a question below to
@@ -494,7 +494,7 @@ export function AIDashboard() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "12.5px",
+                    fontSize: "14px",
                   }}
                   disabled={sending || !input.trim()}
                 >
@@ -503,7 +503,7 @@ export function AIDashboard() {
                 <span
                   className="promptHint"
                   style={{
-                    fontSize: "10px",
+                    fontSize: "12px",
                     margin: 0,
                     color: "var(--text-secondary)",
                     whiteSpace: "nowrap",

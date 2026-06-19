@@ -70,7 +70,7 @@ export default async function SnapshotsPage({
                 · commit{" "}
                 <code
                   style={{
-                    fontSize: 12,
+                    fontSize: 14,
                     fontFamily: "monospace",
                     color: "var(--accent)",
                   }}
@@ -118,7 +118,7 @@ export default async function SnapshotsPage({
         <div className="section-title">Full history</div>
 
         {!result ? (
-          <p style={{ color: "var(--danger)", fontSize: 13, paddingTop: 12 }}>
+          <p style={{ color: "var(--danger)", fontSize: 15, paddingTop: 12 }}>
             Failed to load snapshots. Check the backend is running.
           </p>
         ) : snapshots.length === 0 ? (
@@ -132,13 +132,13 @@ export default async function SnapshotsPage({
             <p
               style={{
                 fontWeight: 600,
-                fontSize: 14,
+                fontSize: 16,
                 color: "var(--text-secondary)",
               }}
             >
               No snapshots yet
             </p>
-            <p style={{ fontSize: 13, marginTop: 6 }}>
+            <p style={{ fontSize: 15, marginTop: 8 }}>
               Run the backup worker to start collecting repository analytics.
             </p>
           </div>
@@ -162,18 +162,17 @@ export default async function SnapshotsPage({
                 <tbody>
                   {snapshots.map((snap) => (
                     <tr key={snap.id}>
-                      <td className="text-xs">
+                      <td style={{ fontSize: 14 }}>
                         {formatDate(snap.captured_at)}
                       </td>
                       <td
-                        className="text-xs text-muted"
-                        style={{ fontFamily: "monospace" }}
+                        style={{ fontSize: 14, fontFamily: "monospace", color: "var(--text-muted)" }}
                       >
                         {snap.head_commit ? snap.head_commit.slice(0, 10) : "—"}
                       </td>
                       <td
-                        className="truncate text-xs"
-                        style={{ maxWidth: 180 }}
+                        className="truncate"
+                        style={{ maxWidth: 180, fontSize: 14 }}
                         title={snap.head_commit_message}
                       >
                         {snap.head_commit_message || "—"}

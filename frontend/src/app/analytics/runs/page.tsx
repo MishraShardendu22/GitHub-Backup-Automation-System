@@ -54,7 +54,7 @@ export default async function RunHistoryPage({
 
       <section className="card section-card">
         {!result ? (
-          <p style={{ color: "var(--danger)", fontSize: 13 }}>
+          <p style={{ color: "var(--danger)", fontSize: 15 }}>
             Failed to load run history. Check the backend is running.
           </p>
         ) : runs.length === 0 ? (
@@ -93,7 +93,7 @@ export default async function RunHistoryPage({
                           {run.status}
                         </span>
                       </td>
-                      <td className="text-xs text-muted">
+                      <td style={{ fontSize: 14, color: "var(--text-muted)" }}>
                         {formatDate(run.started_at)}
                       </td>
                       <td>{formatDuration(run.duration_ms)}</td>
@@ -113,7 +113,7 @@ export default async function RunHistoryPage({
                         <Link
                           href={`/backups/${run.id}`}
                           className="btn btn-ghost"
-                          style={{ fontSize: 12 }}
+                          style={{ fontSize: 14 }}
                         >
                           Details →
                         </Link>
@@ -151,13 +151,13 @@ function EmptyRuns() {
       <p
         style={{
           fontWeight: 600,
-          fontSize: 14,
+          fontSize: 16,
           color: "var(--text-secondary)",
         }}
       >
         No runs found
       </p>
-      <p style={{ fontSize: 13, marginTop: 6 }}>
+      <p style={{ fontSize: 15, marginTop: 8 }}>
         Start the backup worker to create a backup run.
       </p>
     </div>

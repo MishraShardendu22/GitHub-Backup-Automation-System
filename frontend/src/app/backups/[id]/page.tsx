@@ -30,7 +30,7 @@ export default async function BackupDetailPage({
 
   return (
     <div className="page">
-      <div className="card" style={{ padding: "24px 32px", background: "rgba(24, 24, 27, 0.4)", borderLeft: "4px solid var(--accent)", marginBottom: 24 }}>
+      <div className="card" style={{ padding: "32px 48px", background: "rgba(24, 24, 27, 0.4)", borderLeft: "4px solid var(--accent)", marginBottom: 32 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
           <div>
             <div className="page-kicker">
@@ -49,7 +49,7 @@ export default async function BackupDetailPage({
             </p>
           </div>
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 8 }}>Run Status</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 8 }}>Run Status</div>
             <StatusBadge status={run.status} />
           </div>
         </div>
@@ -81,7 +81,7 @@ export default async function BackupDetailPage({
         {results.length === 0 ? (
           <p
             style={{
-              fontSize: 13,
+              fontSize: 15,
               color: "var(--text-muted)",
               padding: "20px 0",
             }}
@@ -113,8 +113,8 @@ export default async function BackupDetailPage({
                         : "—"}
                     </td>
                     <td
-                      className="text-xs"
                       style={{
+                        fontSize: 14,
                         fontFamily: "monospace",
                         color: "var(--text-muted)",
                       }}
@@ -124,8 +124,8 @@ export default async function BackupDetailPage({
                         : "—"}
                     </td>
                     <td
-                      className="text-xs"
                       style={{
+                        fontSize: 14,
                         color: result.error_message
                           ? "var(--danger)"
                           : "var(--text-muted)",

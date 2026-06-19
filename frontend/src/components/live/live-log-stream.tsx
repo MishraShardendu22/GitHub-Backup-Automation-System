@@ -91,14 +91,13 @@ export function LiveLogStream() {
 
       <div className="card log-card">
         <div className="log-header">
-          <span style={{ fontWeight: 600, fontSize: 14 }}>Log stream</span>
-          <span className="text-xs text-muted">{logs.length} entries</span>
+          <span style={{ fontWeight: 600, fontSize: 16 }}>Log stream</span>
+          <span style={{ fontSize: 14, color: "var(--text-muted)" }}>{logs.length} entries</span>
         </div>
         <div className="log-body">
           {logs.length === 0 ? (
             <div
-              className="text-sm text-muted"
-              style={{ textAlign: "center", paddingTop: 120 }}
+              style={{ fontSize: 15, color: "var(--text-muted)", textAlign: "center", paddingTop: 120 }}
             >
               {connected
                 ? "Waiting for log messages..."
@@ -107,7 +106,7 @@ export function LiveLogStream() {
           ) : (
             logs.map((log, i) => (
               <div key={`${log.id}-${i}`} className="log-row">
-                <span className="text-xs text-muted">
+                <span style={{ fontSize: 13, color: "var(--text-muted)" }}>
                   {log.timestamp
                     ? new Date(log.timestamp).toLocaleTimeString()
                     : ""}
@@ -116,15 +115,15 @@ export function LiveLogStream() {
                   style={{
                     color: levelColor(log.level),
                     fontWeight: 700,
-                    fontSize: 11,
+                    fontSize: 13,
                   }}
                 >
                   {log.level?.toUpperCase()}
                 </span>
-                <span className="text-xs truncate" style={{ color: "var(--accent)", opacity: 0.8 }}>
+                <span className="truncate" style={{ fontSize: 13, color: "var(--accent)", opacity: 0.8 }}>
                   {log.repository ? `[${log.repository}]` : "[system]"}
                 </span>
-                <span style={{ fontSize: 12, color: "var(--text)" }}>
+                <span style={{ fontSize: 14, color: "var(--text)" }}>
                   {log.message}
                 </span>
               </div>

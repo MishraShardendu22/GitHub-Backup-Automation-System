@@ -128,7 +128,7 @@ export default function Sidebar({
   // Update CSS variable for layout margin-left
   useEffect(() => {
     if (mounted) {
-      const width = isCollapsed ? "68px" : "250px";
+      const width = isCollapsed ? "68px" : "280px";
       document.documentElement.style.setProperty("--sidebar-width", width);
     }
   }, [isCollapsed, mounted]);
@@ -230,7 +230,7 @@ export default function Sidebar({
 
   if (!mounted) {
     return (
-      <aside className="global-sidebar" style={{ width: "250px" }}>
+      <aside className="global-sidebar" style={{ width: "280px" }}>
         <div
           className="global-sidebar-header"
           style={{ justifyContent: "flex-end" }}
@@ -256,7 +256,7 @@ export default function Sidebar({
       <aside
         className={`global-sidebar ${isMobileOpen ? "mobile-open" : ""}`}
         style={{
-          width: isCollapsed ? "68px" : "250px",
+          width: isCollapsed ? "68px" : "280px",
         }}
       >
         {/* Sidebar Header */}
@@ -321,7 +321,7 @@ export default function Sidebar({
                     style={{ justifyContent: "center", padding: "10px 0" }}
                     onClick={onCloseMobile}
                   >
-                    <RepIcon size={18} />
+                    <RepIcon size={20} />
                   </Link>
                   <span className="sidebar-tooltip">
                     {node.label}
@@ -364,7 +364,7 @@ export default function Sidebar({
                       )}
                     </span>
                     <span className="tree-node-icon">
-                      <FolderIcon size={16} />
+                      <FolderIcon size={18} />
                     </span>
                     <span className="tree-node-label">{node.label}</span>
                   </button>
@@ -386,11 +386,11 @@ export default function Sidebar({
                               className="tree-node-icon"
                               style={{ marginLeft: 4 }}
                             >
-                              <ChildIcon size={14} />
+                              <ChildIcon size={16} />
                             </span>
                             <span
                               className="tree-node-label"
-                              style={{ fontSize: "12px" }}
+                              style={{ fontSize: "14px" }}
                             >
                               {child.label}
                             </span>
@@ -413,7 +413,7 @@ export default function Sidebar({
                 onClick={onCloseMobile}
               >
                 <span className="tree-node-icon">
-                  <Icon size={16} />
+                  <Icon size={18} />
                 </span>
                 <span className="tree-node-label">{node.label}</span>
               </Link>
@@ -429,7 +429,7 @@ export default function Sidebar({
                 style={{ justifyContent: "center", padding: "10px 0" }}
                 onClick={onCloseMobile}
               >
-                <MessageSquare size={18} />
+                <MessageSquare size={20} />
               </Link>
               <span className="sidebar-tooltip">
                 AI Assistant{" "}
@@ -457,9 +457,9 @@ export default function Sidebar({
               >
                 <span className="tree-node-chevron">
                   {expandedNodes.AIAssistant ? (
-                    <ChevronDown size={14} />
+                    <ChevronDown size={16} />
                   ) : (
-                    <ChevronRight size={14} />
+                    <ChevronRight size={16} />
                   )}
                 </span>
                 <span className="tree-node-label" style={{ fontWeight: 600 }}>
@@ -490,11 +490,11 @@ export default function Sidebar({
                     }}
                   >
                     <span className="tree-node-icon" style={{ marginLeft: 4 }}>
-                      <Plus size={14} />
+                      <Plus size={16} />
                     </span>
                     <span
                       className="tree-node-label"
-                      style={{ fontSize: "12px", fontWeight: 600 }}
+                      style={{ fontSize: "14px", fontWeight: 600 }}
                     >
                       New Analysis Chat
                     </span>
@@ -523,11 +523,11 @@ export default function Sidebar({
                     }}
                   >
                     <span className="tree-node-icon" style={{ marginLeft: 4 }}>
-                      <LayoutDashboard size={13} />
+                      <LayoutDashboard size={15} />
                     </span>
                     <span
                       className="tree-node-label"
-                      style={{ fontSize: "12px" }}
+                      style={{ fontSize: "14px" }}
                     >
                       Stats Dashboard
                     </span>
@@ -536,7 +536,7 @@ export default function Sidebar({
                   {/* Chat History Header */}
                   <div
                     style={{
-                      fontSize: "9px",
+                      fontSize: "11px",
                       fontWeight: 700,
                       textTransform: "uppercase",
                       letterSpacing: "0.05em",
@@ -553,7 +553,7 @@ export default function Sidebar({
                       style={{
                         padding: "6px 12px",
                         color: "var(--text-muted)",
-                        fontSize: "11px",
+                        fontSize: "13px",
                       }}
                     >
                       Syncing...
@@ -614,7 +614,7 @@ export default function Sidebar({
                               className="tree-node-icon"
                               style={{ marginLeft: 4 }}
                             >
-                              <MessageSquare size={13} />
+                              <MessageSquare size={15} />
                             </span>
                             {renamingSessionId === s.id ? (
                               <input
@@ -647,7 +647,7 @@ export default function Sidebar({
                               <span
                                 className="tree-node-label"
                                 style={{
-                                  fontSize: "11.5px",
+                                  fontSize: "13.5px",
                                   textOverflow: "ellipsis",
                                   overflow: "hidden",
                                   whiteSpace: "nowrap",
