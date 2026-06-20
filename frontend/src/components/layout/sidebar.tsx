@@ -577,11 +577,14 @@ export default function Sidebar({
                             position: "relative",
                           }}
                         >
-                          <button
-                            type="button"
-                            onClick={() => {
-                              router.push(`/ai/${s.id}`);
-                              onCloseMobile?.();
+                          <Link
+                            href={`/ai/${s.id}`}
+                            onClick={(e) => {
+                              if (renamingSessionId === s.id) {
+                                e.preventDefault();
+                              } else {
+                                onCloseMobile?.();
+                              }
                             }}
                             style={{
                               display: "flex",
@@ -595,6 +598,7 @@ export default function Sidebar({
                               padding: 0,
                               textAlign: "left",
                               color: "inherit",
+                              textDecoration: "none",
                             }}
                           >
                             <span
@@ -643,7 +647,7 @@ export default function Sidebar({
                                 {s.session_name}
                               </span>
                             )}
-                          </button>
+                          </Link>
 
                           {/* Action Hover Controls */}
                           {renamingSessionId !== s.id && (
