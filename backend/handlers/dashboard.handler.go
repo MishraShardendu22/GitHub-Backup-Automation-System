@@ -70,7 +70,9 @@ func GetDashboardStats(c *fiber.Ctx) error {
 	// 	FROM backup_runs
 	// `).Scan(&stats.SuccessRate)
 
-	stats.SuccessRate = (float64(stats.TotalSuccessful) + float64(stats.TotalSkipped))/float64(stats.TotalFailed)
+	if stats.TotalRepos > 0 {
+		stats.SuccessRate = 100.0 - (float64(totalFailed) / float64(stats.TotalRepos) * 100.0)
+	}
 
 	// Query to get average duration of runs
 	// Note: AVG() returns NUMERIC in PostgreSQL, must cast to BIGINT for int64 scan
@@ -205,8 +207,8 @@ func GetDashboardStats(c *fiber.Ctx) error {
 	stats.TotalFailed = totalFailed
 	stats.TotalSkipped = totalSkipped
 
-	if totalSuccess+totalFailed > 0 {
-		stats.SuccessRate = float64(totalSuccess) / float64(totalSuccess+totalFailed) * 100
+	if stats.TotalRepos > 0 {
+		stats.SuccessRate = 100.0 - (float64(totalFailed) / float64(stats.TotalRepos) * 100.0)
 	}
 
 	db.Pool.QueryRow(ctx, `SELECT COALESCE(SUM(total_repos), 0) FROM backup_runs`).Scan(&stats.TotalRepos)
