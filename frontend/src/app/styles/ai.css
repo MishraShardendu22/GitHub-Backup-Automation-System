@@ -222,9 +222,10 @@ body.ai-page-active .app-main {
   box-shadow: 0 8px 24px rgba(139, 92, 246, 0.18);
 }
 
-.sendBtn:hover {
+.sendBtn:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: var(--accent-light);
+  background: #a78bfa;
+  box-shadow: 0 10px 28px rgba(139, 92, 246, 0.25);
 }
 
 .sendBtn:disabled {
@@ -266,10 +267,11 @@ body.ai-page-active .app-main {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-.premadeBtn:hover {
+.premadeBtn:hover:not(:disabled) {
   transform: translateY(-1px);
-  border-color: rgba(139, 92, 246, 0.32);
-  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(139, 92, 246, 0.15);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.12);
 }
 
 /* Chat Feed */

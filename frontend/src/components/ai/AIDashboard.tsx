@@ -63,6 +63,7 @@ export function AIDashboard() {
 
   const [input, setInput] = useState("");
   const [loadMsg, setLoadMsg] = useState("");
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   const {
     messages,
@@ -136,6 +137,7 @@ export function AIDashboard() {
         setLocalSessionId(newSessionId);
       }
 
+      setHasInteracted(true);
       await sendStreamMessage(
         auth.token,
         question,
@@ -373,36 +375,38 @@ export function AIDashboard() {
                 <div className="ai-dashboard-section-title">
                   Ask the Agent About Backups
                 </div>
-                <div className="premadeGrid" style={{ marginTop: 12 }}>
-                  {PREMADE_PROMPTS.map((prompt) => (
-                    <button
-                      key={prompt}
-                      type="button"
-                      className="premadeBtn"
-                      onClick={() => {
-                        if (isAuthenticated) {
-                          setInput(prompt);
-                          composerRef.current?.focus();
+                {!hasInteracted && (
+                  <div className="premadeGrid" style={{ marginTop: 12 }}>
+                    {PREMADE_PROMPTS.map((prompt) => (
+                      <button
+                        key={prompt}
+                        type="button"
+                        className="premadeBtn"
+                        onClick={() => {
+                          if (isAuthenticated) {
+                            setInput(prompt);
+                            composerRef.current?.focus();
+                          }
+                        }}
+                        disabled={sending || !isAuthenticated}
+                        style={
+                          !isAuthenticated
+                            ? {
+                                opacity: 0.6,
+                                cursor: "not-allowed",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "6px",
+                              }
+                            : {}
                         }
-                      }}
-                      disabled={sending || !isAuthenticated}
-                      style={
-                        !isAuthenticated
-                          ? {
-                              opacity: 0.6,
-                              cursor: "not-allowed",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "6px",
-                            }
-                          : {}
-                      }
-                    >
-                      {!isAuthenticated && <LockIcon />}
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
+                      >
+                        {!isAuthenticated && <LockIcon />}
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )
           ) : (

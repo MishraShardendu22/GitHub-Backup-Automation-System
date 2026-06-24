@@ -110,10 +110,11 @@ func GetMetrics(c *fiber.Ctx) error {
 
 		runs = localRuns
 
+		// Note: AVG() returns NUMERIC in PostgreSQL, must cast to BIGINT for int64 scan
 		err = db.Pool.QueryRow(ctx, `
 			SELECT
 				COUNT(*),
-				COALESCE(AVG(duration_ms), 0),
+				COALESCE(AVG(duration_ms)::BIGINT, 0),
 				COALESCE(SUM(successful), 0),
 				COALESCE(SUM(failed), 0),
 				COALESCE(SUM(skipped), 0)

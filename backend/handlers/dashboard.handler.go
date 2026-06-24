@@ -31,6 +31,7 @@ func GetDashboardStats(c *fiber.Ctx) error {
 	var totalSuccess, totalFailed, totalSkipped int
 
 	// Query to fill values of stats and total repo data
+	// Note: AVG() returns NUMERIC in PostgreSQL, must cast to BIGINT for int64 scan
 	err := db.Pool.QueryRow(ctx, `
 		SELECT
 			COUNT(*),
@@ -38,7 +39,7 @@ func GetDashboardStats(c *fiber.Ctx) error {
 			COALESCE(SUM(failed), 0),
 			COALESCE(SUM(skipped), 0),
 			COALESCE(SUM(total_repos), 0),
-			COALESCE(AVG(NULLIF(duration_ms, 0)), 0)
+			COALESCE(AVG(NULLIF(duration_ms, 0))::BIGINT, 0)
 		FROM backup_runs
 	`).Scan(
 		&stats.TotalRuns,
@@ -61,8 +62,9 @@ func GetDashboardStats(c *fiber.Ctx) error {
 	}
 
 	// Query to get average duration of runs
+	// Note: AVG() returns NUMERIC in PostgreSQL, must cast to BIGINT for int64 scan
 	if stats.AvgDurationMs == 0 {
-		_ = db.Pool.QueryRow( ctx, `SELECT COALESCE(AVG(duration_ms), 0) FROM backup_runs`).Scan(&stats.AvgDurationMs)
+		_ = db.Pool.QueryRow( ctx, `SELECT COALESCE(AVG(duration_ms)::BIGINT, 0) FROM backup_runs`).Scan(&stats.AvgDurationMs)
 	}
 
 	// Query to get status of last run
@@ -198,10 +200,10 @@ func GetDashboardStats(c *fiber.Ctx) error {
 
 	db.Pool.QueryRow(ctx, `SELECT COALESCE(SUM(total_repos), 0) FROM backup_runs`).Scan(&stats.TotalRepos)
 	db.Pool.QueryRow(ctx, `SELECT status, started_at FROM backup_runs ORDER BY started_at DESC LIMIT 1`).Scan(&stats.LastRunStatus, &stats.LastRunAt)
-	db.Pool.QueryRow(ctx, `SELECT COALESCE(AVG(NULLIF(duration_ms, 0)), 0) FROM backup_runs`).Scan(&stats.AvgDurationMs)
+	db.Pool.QueryRow(ctx, `SELECT COALESCE(AVG(NULLIF(duration_ms, 0))::BIGINT, 0) FROM backup_runs`).Scan(&stats.AvgDurationMs)
 
 	if stats.AvgDurationMs == 0 {
-		db.Pool.QueryRow(ctx, `SELECT COALESCE(AVG(duration_ms), 0) FROM backup_runs`).Scan(&stats.AvgDurationMs)
+		db.Pool.QueryRow(ctx, `SELECT COALESCE(AVG(duration_ms)::BIGINT, 0) FROM backup_runs`).Scan(&stats.AvgDurationMs)
 	}
 
 	db.Pool.QueryRow(ctx, `SELECT COALESCE(COUNT(DISTINCT repo_full_name), 0) FROM backup_results`).Scan(&stats.DistinctRepos)

@@ -44,7 +44,7 @@ class GoBackendClient:
 
     async def list_analytics_history(self,page: int = 1,limit: int = 50):
         return await self.get(
-            "/api/analytics",
+            "/api/analytics/history",
             {
                 "page": page,
                 "limit": limit,
