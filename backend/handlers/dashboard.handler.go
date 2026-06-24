@@ -135,8 +135,8 @@ func GetDashboardStats(c *fiber.Ctx) error {
 		stats.LargestRepository = latestAnalytics.LargestArchivePath
 	}
 
-	if stats.DistinctRepos > 0 {
-		stats.SuccessRate = 100.0 - (float64(totalFailed) / float64(stats.DistinctRepos) * 100.0)
+	if stats.TotalRepos > 0 {
+		stats.SuccessRate = 100.0 - (float64(totalFailed) / float64(stats.TotalRepos) * 100.0)
 	}
 
 	return c.JSON(stats)
@@ -148,9 +148,9 @@ func loadLatestAnalytics(ctx context.Context) (*models.RepoAnalyticsSnapshot, er
 	var snapshot models.RepoAnalyticsSnapshot
 	err := db.Pool.QueryRow(ctx,
 		`SELECT id, run_id, captured_at, head_commit, head_commit_message, head_commit_at, total_commits, branch_count, tag_count, tracked_files,
-			total_blob_size_bytes, avg_blob_size_bytes, largest_blob_path, largest_blob_size_bytes,
-			archive_count, total_archive_size_bytes, avg_archive_size_bytes, largest_archive_path, largest_archive_size_bytes
-		 FROM analytics_snapshots ORDER BY captured_at DESC LIMIT 1`).Scan(
+		total_blob_size_bytes, avg_blob_size_bytes, largest_blob_path, largest_blob_size_bytes,
+		archive_count, total_archive_size_bytes, avg_archive_size_bytes, largest_archive_path, largest_archive_size_bytes
+		FROM analytics_snapshots ORDER BY captured_at DESC LIMIT 1`).Scan(
 		&snapshot.ID, &snapshot.RunID, &snapshot.CapturedAt, &snapshot.HeadCommit, &snapshot.HeadCommitMessage, &snapshot.HeadCommitAt, &snapshot.TotalCommits, &snapshot.BranchCount, &snapshot.TagCount, &snapshot.TrackedFiles,
 		&snapshot.TotalBlobSizeBytes, &snapshot.AvgBlobSizeBytes, &snapshot.LargestBlobPath, &snapshot.LargestBlobSizeBytes,
 		&snapshot.ArchiveCount, &snapshot.TotalArchiveSizeBytes, &snapshot.AvgArchiveSizeBytes, &snapshot.LargestArchivePath, &snapshot.LargestArchiveSizeBytes,
