@@ -70,9 +70,7 @@ func GetDashboardStats(c *fiber.Ctx) error {
 	// 	FROM backup_runs
 	// `).Scan(&stats.SuccessRate)
 
-	if stats.TotalRepos > 0 {
-		stats.SuccessRate = 100.0 - (float64(totalFailed) / float64(stats.TotalRepos) * 100.0)
-	}
+	// Success rate is calculated later, after DistinctRepos is fetched.
 
 	// Query to get average duration of runs
 	// Note: AVG() returns NUMERIC in PostgreSQL, must cast to BIGINT for int64 scan
@@ -135,6 +133,10 @@ func GetDashboardStats(c *fiber.Ctx) error {
 		stats.TotalSizeBytes = latestAnalytics.TotalArchiveSizeBytes
 		stats.LargestArchiveBytes = latestAnalytics.LargestArchiveSizeBytes
 		stats.LargestRepository = latestAnalytics.LargestArchivePath
+	}
+
+	if stats.DistinctRepos > 0 {
+		stats.SuccessRate = 100.0 - (float64(totalFailed) / float64(stats.DistinctRepos) * 100.0)
 	}
 
 	return c.JSON(stats)
