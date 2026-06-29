@@ -208,8 +208,30 @@ func PushBackupRepo(label string) error {
 
 /*
 Initialisation script, usually runs only the first time
-gpg verification was casuing runs to fail
-git config commit.gpgsign false 
+
+Reason for adding - git config commit.gpgsign false
+
+My global Git config had (my fedora machine's global config basically):
+- commit.gpgsign=true
+- So every git commit tried to create a GPG-signed commit.
+
+In this script -
+Go code did not use -S, but Git still signed because of the global configuration. (cause of global config)
+
+When I ran the program manually, I was in an interactive terminal, so GPG could work normally.
+When systemd ran the program, there was no interactive terminal (TTY).
+
+GPG tried to sign the commit but couldn't interact with a terminal, so it failed with:
+	gpg: signing failed: Inappropriate ioctl for device
+	fatal: failed to write commit object
+	Since the commit failed, the backup process stopped and never pushed the backup.
+
+I fixed it by setting the backup repository to:
+git config commit.gpgsign false (manually for this isntance and initiated in builtInitScript below)
+
+Repository Git configuration overrides the global configuration.
+Now Git no longer attempts GPG signing for that repository, so commits work both manually and when run by systemd.
+
 */
 func buildInitScript(backupRepoPath string) string {
 	return fmt.Sprintf(`cd _Repos && \
